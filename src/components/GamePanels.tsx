@@ -183,6 +183,7 @@ function SiblingPromo({
   beatTarget?: number | null;
   beatVictory?: boolean;
 }) {
+  const placement = siblingSurface(beatTarget, beatVictory);
   return (
     <a
       href={SIBLING_PLAY_URL}
@@ -190,12 +191,12 @@ function SiblingPromo({
       rel="noopener noreferrer"
       onClick={() =>
         track("sibling_click", {
-          placement: "more_ways",
-          surface: siblingSurface(beatTarget, beatVictory),
+          placement,
+          surface: placement,
           sibling: "push-flappy",
         })
       }
-      className="inline-flex min-h-8 items-center justify-center text-[11px] font-medium text-teal-400 underline-offset-2 hover:text-teal-200 hover:underline"
+      className="mt-2 flex min-h-11 w-full items-center justify-center rounded-xl border border-lime-200/60 bg-transparent px-3 py-2.5 text-sm font-semibold leading-snug text-lime-100 hover:border-lime-200 hover:bg-lime-400/10"
     >
       {SIBLING_PROMO_LINE}
     </a>
@@ -329,6 +330,7 @@ export function GameOverPanel({
         >
           {primaryLabel}
         </button>
+        <SiblingPromo beatTarget={beatTarget} beatVictory={beatVictory} />
         <button
           type="button"
           onClick={onRestart}
@@ -427,9 +429,6 @@ export function GameOverPanel({
             </ShareActionButton>
           </div>
         </div>
-        <p className="mt-3">
-          <SiblingPromo beatTarget={beatTarget} beatVictory={beatVictory} />
-        </p>
       </div>
     </div>
   );
