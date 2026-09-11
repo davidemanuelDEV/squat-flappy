@@ -62,5 +62,6 @@ export function servingOrigin(
 export const APP_NAME = "Squat Flappy";
 export const APP_HOOK = "Your standing desk is now an arcade.";
 export const APP_LINE = "Stand. Squat. Dodge.";
+export const CAM_SETUP_HINT = "Cam at chest height · start in a squat";
 export const APP_TAGLINE =
-  "Eye-height webcam air-squat game. Cam at eye height · start in a squat.";
+  "Chest-height webcam air-squat game. Cam at chest height · start in a squat.";

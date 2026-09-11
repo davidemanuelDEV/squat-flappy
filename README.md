@@ -2,7 +2,7 @@
 
 **Your standing desk is now an arcade.**
 
-Stand. Squat. Dodge. Eye-height webcam air-squat game.
+Stand. Squat. Dodge. Chest-height webcam air-squat game.
 
 Sibling of [Push Flappy](https://pushflappy.com) — its own branded app, pose mapping, and daily board. Not a mode inside Push Flappy. Wipeout / challenge share surfaces light-link “Legs smoked? Push day → pushflappy.com” to `https://pushflappy.com/play` (`SIBLING_PLAY_URL` in `src/lib/site.ts`).
 
@@ -52,7 +52,7 @@ Do **not** use torso-Y push-up mapping.
 4. If the desk hides the knees, hip-only fallback.
 5. EMA smoothing. Reps are **squats**, not push-ups.
 
-Desk hypothesis: hip Y is more reliable at eye height. If a low camera makes stand sit *lower* in the frame than squat, hip polarity inverts automatically.
+Recommend chest-height framing so hips and knees stay visible. Hip Y is still the primary desk signal; if a low camera makes stand sit *lower* in the frame than squat, hip polarity inverts automatically.
 
 ## Stack
 

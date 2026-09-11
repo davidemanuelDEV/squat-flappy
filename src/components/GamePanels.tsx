@@ -4,7 +4,7 @@ import type { ReactNode } from "react";
 import Link from "next/link";
 
 import { track } from "@/lib/analytics";
-import { SIBLING_PLAY_URL, SIBLING_PROMO_LINE } from "@/lib/site";
+import { CAM_SETUP_HINT, SIBLING_PLAY_URL, SIBLING_PROMO_LINE } from "@/lib/site";
 import type { CalibPhase } from "@/lib/pose";
 import type { LeaderboardEntry } from "@/lib/leaderboard-store";
 
@@ -19,8 +19,8 @@ export function OrientationTip({ show }: { show: boolean }) {
   return (
     <div className="pointer-events-none absolute inset-x-0 top-[4.25rem] z-10 flex justify-center px-3 sm:top-16">
       <p className="max-w-[20rem] rounded-2xl bg-black/65 px-3 py-2 text-center text-[11px] leading-snug text-teal-50 backdrop-blur-md sm:max-w-sm sm:text-xs">
-        Cam at eye height · start in a squat. Laptop on the desk, webcam facing
-        you — knees can hide behind the desk.
+        {CAM_SETUP_HINT}. Laptop on the desk, webcam facing you — hips and
+        knees more visible.
       </p>
     </div>
   );
@@ -88,8 +88,8 @@ export function ReadyPanel({
           </p>
         )}
         <p className="mt-1.5 text-xs leading-relaxed text-teal-100/80 sm:text-sm">
-          Cam at eye height · start in a squat. Hold ~90° (parallel) to lock
-          bird “up”. Stand tall to dive. Same daily gate seed for everyone (PT).
+          {CAM_SETUP_HINT}. Hold ~90° (parallel) to lock bird “up”. Stand tall
+          to dive. Same daily gate seed for everyone (PT).
         </p>
         <button
           type="button"

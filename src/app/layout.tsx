@@ -22,7 +22,7 @@ const display = Space_Grotesk({
 
 const siteUrl = servingOrigin();
 const siteTitle = `${APP_NAME}: ${APP_LINE} — air squat camera game`;
-const siteDescription = `${APP_HOOK} ${APP_LINE} Desk exercise game with an eye-height webcam. On-device MediaPipe. No accounts.`;
+const siteDescription = `${APP_HOOK} ${APP_LINE} Desk exercise game with a chest-height webcam. On-device MediaPipe. No accounts.`;
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),

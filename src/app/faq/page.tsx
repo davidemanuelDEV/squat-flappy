@@ -31,11 +31,11 @@ export const metadata: Metadata = {
 const FAQS: { q: string; a: string }[] = [
   {
     q: "How does Squat Flappy work?",
-    a: "Your body is the controller. An eye-height webcam and on-device pose tracking map a ~90° air squat to bird up and standing tall to a dive. Sit to rise, stand to drop through steel gates. Clear gaps to score — no taps once you are calibrated.",
+    a: "Your body is the controller. A chest-height webcam and on-device pose tracking map a ~90° air squat to bird up and standing tall to a dive. Sit to rise, stand to drop through steel gates. Clear gaps to score — no taps once you are calibrated.",
   },
   {
     q: "What camera setup do I need?",
-    a: "Laptop on a standing desk, webcam at eye height, facing you. Allow camera permission, start in a squat, and hold parallel for about a second to lock “up.” Knees can hide behind the desk — hips are enough. HTTPS (squatflappy.com or *.vercel.app) or localhost is required.",
+    a: "Laptop on a standing desk, webcam at chest height, facing you. Allow camera permission, start in a squat, and hold parallel for about a second to lock “up.” Chest-height framing keeps hips and knees more visible; hips are enough if the desk hides knees. HTTPS (squatflappy.com or *.vercel.app) or localhost is required.",
   },
   {
     q: "Is this a mode inside Push Flappy?",

@@ -56,6 +56,7 @@ import {
   ReadyPanel,
 } from "@/components/GamePanels";
 import PlaySplash from "@/components/PlaySplash";
+import { CAM_SETUP_HINT } from "@/lib/site";
 
 type CamStatus = "idle" | "requesting" | "ready" | "error" | "denied";
 
@@ -769,9 +770,9 @@ export default function SquatFlappyGame() {
     if (!hasPose) {
       return {
         tone: "lime" as const,
-        title: "Cam at eye height · start in a squat",
+        title: CAM_SETUP_HINT,
         detail:
-          "Laptop on the desk, webcam facing you. Drop to parallel so we can see your hips.",
+          "Laptop on the desk, webcam at chest height facing you. Drop to parallel so we can see your hips and knees.",
       };
     }
     if (calibPhase === "waiting" || calibPhase === "holding") {
@@ -781,7 +782,7 @@ export default function SquatFlappyGame() {
         detail:
           holdProgress > 0
             ? `Hold steady… ${Math.round(holdProgress * 100)}%`
-            : "Thighs parallel. Knees can hide behind the desk — hips are enough.",
+            : "Thighs parallel. Chest-height cam keeps hips and knees in frame.",
       };
     }
     return {
