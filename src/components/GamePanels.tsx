@@ -202,6 +202,47 @@ function SiblingPromo({
   );
 }
 
+const NICK_MAX_LENGTH = 16;
+const EMOJI_MAX_LENGTH = 4;
+
+function AnonymousNickFields({
+  nick,
+  emoji,
+  onNick,
+  onEmoji,
+}: {
+  nick: string;
+  emoji: string;
+  onNick: (v: string) => void;
+  onEmoji: (v: string) => void;
+}) {
+  return (
+    <div className="flex gap-2">
+      <input
+        aria-label="Emoji"
+        value={emoji}
+        onChange={(e) => onEmoji(e.target.value)}
+        className="w-14 min-h-11 rounded-xl border border-teal-800 bg-teal-950 px-2 py-2 text-center text-lg"
+        maxLength={EMOJI_MAX_LENGTH}
+      />
+      <input
+        aria-label="Nick"
+        value={nick}
+        onChange={(e) => onNick(e.target.value)}
+        placeholder="Nick"
+        className="min-h-11 min-w-0 flex-1 rounded-xl border border-teal-800 bg-teal-950 px-3 py-2 text-sm"
+        maxLength={NICK_MAX_LENGTH}
+      />
+    </div>
+  );
+}
+
+function submitStatusClass(msg: string, posted: boolean) {
+  return posted || msg.startsWith("Posted")
+    ? "text-lime-300"
+    : "text-rose-300";
+}
+
 export function GameOverPanel({
   score,
   highScore,
@@ -210,6 +251,14 @@ export function GameOverPanel({
   beatTarget,
   beatVictory,
   shareStatus,
+  nick,
+  emoji,
+  submitting,
+  submitMsg,
+  scorePosted,
+  onNick,
+  onEmoji,
+  onSubmitScore,
   onRestart,
   onSharePrimary,
   onShareWhatsApp,
@@ -226,6 +275,14 @@ export function GameOverPanel({
   beatTarget?: number | null;
   beatVictory?: boolean;
   shareStatus?: string | null;
+  nick: string;
+  emoji: string;
+  submitting: boolean;
+  submitMsg: string | null;
+  scorePosted: boolean;
+  onNick: (v: string) => void;
+  onEmoji: (v: string) => void;
+  onSubmitScore: () => void;
   onRestart: () => void;
   onSharePrimary: () => void;
   onShareWhatsApp: () => void;
@@ -238,8 +295,8 @@ export function GameOverPanel({
   const primaryLabel = beatVictory ? "Your move" : "Challenge a friend";
 
   return (
-    <div className="absolute inset-0 z-10 flex items-end justify-center bg-gradient-to-t from-black/75 via-black/45 to-black/25 p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] sm:items-center sm:bg-black/55 sm:p-4">
-      <div className="w-full max-w-sm rounded-2xl border border-teal-800/50 bg-teal-950/95 p-5 text-center shadow-xl backdrop-blur-md sm:p-6">
+    <div className="absolute inset-0 z-10 flex items-end justify-center overflow-y-auto bg-gradient-to-t from-black/75 via-black/45 to-black/25 p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] sm:items-center sm:bg-black/55 sm:p-4">
+      <div className="my-auto w-full max-w-sm rounded-2xl border border-teal-800/50 bg-teal-950/95 p-5 text-center shadow-xl backdrop-blur-md sm:p-6">
         <p className="text-sm uppercase tracking-wide text-lime-200/60">
           Game over
         </p>
@@ -282,6 +339,36 @@ export function GameOverPanel({
         <p className="mt-1.5 text-[11px] text-teal-500 sm:text-xs">
           Play again re-sets your squat start position.
         </p>
+        <form
+          className="mt-3 space-y-2 text-left"
+          onSubmit={(e) => {
+            e.preventDefault();
+            if (!submitting && !scorePosted) onSubmitScore();
+          }}
+        >
+          <AnonymousNickFields
+            nick={nick}
+            emoji={emoji}
+            onNick={onNick}
+            onEmoji={onEmoji}
+          />
+          {submitMsg && (
+            <p className={`text-xs ${submitStatusClass(submitMsg, scorePosted)}`}>
+              {submitMsg}
+            </p>
+          )}
+          <button
+            type="submit"
+            disabled={submitting || scorePosted}
+            className="flex min-h-11 w-full items-center justify-center rounded-xl bg-lime-400 px-4 py-3 font-bold text-lime-950 disabled:opacity-50"
+          >
+            {submitting
+              ? "Posting…"
+              : scorePosted
+                ? "Posted"
+                : "Submit your score"}
+          </button>
+        </form>
         <button
           type="button"
           onClick={onOpenBoard}
@@ -504,25 +591,16 @@ export function LeaderboardPanel({
               Post this run ({score} · {reps} squats) with an anonymous nick —
               no accounts. Country is detected from your connection.
             </p>
-            <div className="flex gap-2">
-              <input
-                aria-label="Emoji"
-                value={emoji}
-                onChange={(e) => onEmoji(e.target.value)}
-                className="w-14 rounded-xl border border-teal-800 bg-teal-950 px-2 py-2 text-center text-lg"
-                maxLength={4}
-              />
-              <input
-                aria-label="Nick"
-                value={nick}
-                onChange={(e) => onNick(e.target.value)}
-                placeholder="Nick"
-                className="min-w-0 flex-1 rounded-xl border border-teal-800 bg-teal-950 px-3 py-2 text-sm"
-                maxLength={16}
-              />
-            </div>
+            <AnonymousNickFields
+              nick={nick}
+              emoji={emoji}
+              onNick={onNick}
+              onEmoji={onEmoji}
+            />
             {submitMsg && (
-              <p className="text-xs text-lime-300">{submitMsg}</p>
+              <p className={`text-xs ${submitStatusClass(submitMsg, false)}`}>
+                {submitMsg}
+              </p>
             )}
             <div className="flex gap-2">
               <button
