@@ -3,7 +3,8 @@ import { APP_NAME, siteOrigin } from "./site";
 
 /**
  * Beat-me deep links + platform share helpers.
- * Origin comes from NEXT_PUBLIC_SITE_ORIGIN or the Vercel production URL.
+ * Origin is NEXT_PUBLIC_SITE_ORIGIN, else https://squatflappy.com.
+ * *.vercel.app can serve the app until DNS is attached — do not buy a domain here.
  */
 
 export type BeatChallenge = {

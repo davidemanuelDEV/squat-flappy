@@ -20,6 +20,10 @@ describe("site origin + board keys", () => {
   });
 
   it("builds beat-me links on /play?beat=N", () => {
+    assert.equal(
+      playUrl({ beat: 15, origin: siteOrigin({}) }),
+      "https://squatflappy.com/play?beat=15"
+    );
     const url = playUrl({
       beat: 21,
       reps: 8,

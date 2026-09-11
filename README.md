@@ -36,7 +36,7 @@ Optional durable daily board (same Vercel KV / Upstash pair as other apps is OK 
 
 | Env var | Purpose |
 |---------|---------|
-| `NEXT_PUBLIC_SITE_ORIGIN` | Public origin for share / OG / sitemap |
+| `NEXT_PUBLIC_SITE_ORIGIN` | Public origin for share / OG / sitemap / beat-me. Defaults to `https://squatflappy.com`. |
 | `KV_REST_API_URL` | Upstash / Vercel KV REST URL |
 | `KV_REST_API_TOKEN` | REST token |
 
