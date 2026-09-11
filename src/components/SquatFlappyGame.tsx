@@ -122,6 +122,7 @@ export default function SquatFlappyGame() {
   const [emoji, setEmoji] = useState("🦵");
   const [submitting, setSubmitting] = useState(false);
   const [submitMsg, setSubmitMsg] = useState<string | null>(null);
+  const [scorePosted, setScorePosted] = useState(false);
 
   useEffect(() => {
     beatTargetRef.current = beatTarget;
@@ -500,6 +501,8 @@ export default function SquatFlappyGame() {
     pendingWipeoutRef.current = null;
     setWipeoutLine(null);
     setShareStatus(null);
+    setSubmitMsg(null);
+    setScorePosted(false);
     victoryFiredRef.current = false;
     setBeatVictory(false);
     setCountdown(null);
@@ -562,6 +565,8 @@ export default function SquatFlappyGame() {
     pendingWipeoutRef.current = null;
     beginCalibration();
     setShareStatus(null);
+    setSubmitMsg(null);
+    setScorePosted(false);
     victoryFiredRef.current = false;
     setBeatVictory(false);
     gameRef.current = {
@@ -758,13 +763,15 @@ export default function SquatFlappyGame() {
         reps: ui.reps,
         storage: data.storage,
       });
+      setScorePosted(true);
       setSubmitMsg(
         data.storage === "memory"
           ? "Posted (memory — set KV_REST_API_URL + KV_REST_API_TOKEN for persistence)"
           : "Posted to today’s board!"
       );
     } catch (e) {
-      setBoardError(e instanceof Error ? e.message : "Submit failed");
+      const msg = e instanceof Error ? e.message : "Submit failed";
+      setSubmitMsg(msg);
     } finally {
       setSubmitting(false);
     }
@@ -893,6 +900,14 @@ export default function SquatFlappyGame() {
             beatTarget={beatTarget}
             beatVictory={beatVictory}
             shareStatus={shareStatus}
+            nick={nick}
+            emoji={emoji}
+            submitting={submitting}
+            submitMsg={submitMsg}
+            scorePosted={scorePosted}
+            onNick={setNick}
+            onEmoji={setEmoji}
+            onSubmitScore={() => void onSubmitScore()}
             onRestart={onRestart}
             onSharePrimary={onSharePrimary}
             onShareWhatsApp={onShareWhatsApp}

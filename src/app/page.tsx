@@ -1,7 +1,15 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
 import { GeometricBird, SteelBar } from "@/components/BrandMark";
-import { APP_HOOK, APP_LINE, APP_NAME, CAM_SETUP_HINT, siteOrigin } from "@/lib/site";
+import {
+  APP_HOOK,
+  APP_LINE,
+  APP_NAME,
+  CAM_SETUP_HINT,
+  SIBLING_NAME,
+  SIBLING_ORIGIN,
+  siteOrigin,
+} from "@/lib/site";
 
 export default function HomePage() {
   const origin = siteOrigin();
@@ -205,6 +213,16 @@ export default function HomePage() {
             <Link href="/play" className="underline-offset-2 hover:underline">
               Play
             </Link>
+          </p>
+          <p className="text-sm text-teal-200">
+            <a
+              href={SIBLING_ORIGIN}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="underline-offset-2 hover:underline"
+            >
+              Also play {SIBLING_NAME}
+            </a>
           </p>
           <p className="text-[11px] text-teal-700">
             squatflappy.com · no accounts · pose stays on your device
