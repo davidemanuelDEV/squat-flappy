@@ -30,7 +30,7 @@ vercel link
 vercel --prod
 ```
 
-Canonical origin is **https://squatflappy.com** (share, OG, sitemap, beat-me). A `*.vercel.app` URL is fine to serve the app until DNS is attached — do not buy a domain from this repo. Override with `NEXT_PUBLIC_SITE_ORIGIN` if you need a different public host. Never use pushflappy.com.
+Canonical origin is **https://squatflappy.com** (share, OG, sitemap, beat-me). Preview deployments (`VERCEL_ENV=preview`) may emit the preview `*.vercel.app` host so branch unfurls stay fetchable. Override with `NEXT_PUBLIC_SITE_ORIGIN` if you need a different public host. Never use pushflappy.com.
 
 Optional durable daily board (same Vercel KV / Upstash pair as other apps is OK — keys are prefixed `squat-flappy:`):
 

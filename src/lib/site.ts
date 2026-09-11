@@ -1,6 +1,6 @@
 /**
  * Public site origin for share links, OG, robots, sitemap.
- * Canonical product host is squatflappy.com (DNS may be attached later).
+ * Canonical product host is squatflappy.com.
  * Never use pushflappy.com as this app's origin — that host is the sibling.
  */
 
@@ -40,19 +40,22 @@ export function siteOrigin(
 }
 
 /**
- * Host crawlers can actually fetch (OG images, metadataBase, share URLs).
- * Prefer the live Vercel production alias, then the deployment URL.
- * After squatflappy.com is attached as production, that host wins.
+ * Host for metadataBase, OG/twitter images, and in-app share/beat-me URLs.
+ * NEXT_PUBLIC_SITE_ORIGIN overrides everything.
+ * Preview deployments keep the preview host so branch unfurls stay fetchable.
+ * Production (and anything without a preview URL) uses squatflappy.com —
+ * VERCEL_PROJECT_PRODUCTION_URL stays squat-flappy.vercel.app even after
+ * the custom domain is attached.
  */
 export function servingOrigin(
   env: NodeJS.ProcessEnv = process.env
 ): string {
   const explicit = env.NEXT_PUBLIC_SITE_ORIGIN?.trim();
   if (explicit) return stripSlash(explicit);
-  const prod = env.VERCEL_PROJECT_PRODUCTION_URL?.trim();
-  if (prod) return withHttps(prod);
-  const vercel = env.VERCEL_URL?.trim();
-  if (vercel) return withHttps(vercel);
+  if (env.VERCEL_ENV === "preview") {
+    const vercel = env.VERCEL_URL?.trim();
+    if (vercel) return withHttps(vercel);
+  }
   return CANONICAL_ORIGIN;
 }
 
