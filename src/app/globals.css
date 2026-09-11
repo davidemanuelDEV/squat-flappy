@@ -1,0 +1,99 @@
+@import "tailwindcss";
+
+:root {
+  --background: #06161a;
+  --foreground: #ecfdf5;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+html,
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-geist-sans), system-ui, sans-serif;
+  overscroll-behavior: none;
+}
+
+body {
+  min-height: 100dvh;
+  background-image:
+    radial-gradient(ellipse 80% 50% at 50% -10%, rgba(163, 230, 53, 0.16), transparent 55%),
+    radial-gradient(ellipse 60% 40% at 90% 90%, rgba(13, 148, 136, 0.22), transparent 50%);
+}
+
+.font-display {
+  font-family: var(--font-display), var(--font-geist-sans), system-ui, sans-serif;
+}
+
+body.play-lock {
+  overflow: hidden;
+  overscroll-behavior: none;
+  touch-action: none;
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+@keyframes sf-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
+}
+
+@keyframes sf-pipes {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(4px);
+  }
+}
+
+.sf-float {
+  animation: sf-float 2.8s ease-in-out infinite;
+  will-change: transform;
+}
+
+.sf-pipes {
+  animation: sf-pipes 3.2s ease-in-out infinite;
+  will-change: transform;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sf-float,
+  .sf-pipes {
+    animation: none;
+  }
+}
+
+@keyframes sf-pulse {
+  0%,
+  100% {
+    opacity: 0.55;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+.sf-splash-mark {
+  animation: sf-pulse 1.6s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sf-splash-mark {
+    animation: none;
+  }
+}

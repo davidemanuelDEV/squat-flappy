@@ -1,0 +1,17 @@
+{
+  "name": "Squat Flappy",
+  "short_name": "Squat Flappy",
+  "description": "Your standing desk is now an arcade. Stand. Squat. Dodge.",
+  "start_url": "/play",
+  "display": "standalone",
+  "background_color": "#06161a",
+  "theme_color": "#06161a",
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}
