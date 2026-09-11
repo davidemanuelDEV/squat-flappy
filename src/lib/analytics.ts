@@ -7,7 +7,8 @@ export type GrowthEvent =
   | "play_wipeout"
   | "challenge_open"
   | "share_click"
-  | "board_submit";
+  | "board_submit"
+  | "sibling_click";
 
 export type ShareChannel = "wa" | "x" | "copy" | "native" | "card" | "primary";
 

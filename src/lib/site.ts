@@ -1,10 +1,18 @@
 /**
  * Public site origin for share links, OG, robots, sitemap.
  * Canonical product host is squatflappy.com (DNS may be attached later).
- * Never hardcode pushflappy.com — this is a sibling app.
+ * Never use pushflappy.com as this app's origin — that host is the sibling.
  */
 
 export const CANONICAL_ORIGIN = "https://squatflappy.com";
+
+/**
+ * Sibling arcade (Push Flappy). Easy to retarget later.
+ * Do not reuse these for sitemap / robots / OG / beat-me links.
+ */
+export const SIBLING_NAME = "Push Flappy";
+export const SIBLING_ORIGIN = "https://pushflappy.com";
+export const SIBLING_PLAY_URL = `${SIBLING_ORIGIN}/play`;
 
 function stripSlash(url: string): string {
   return url.replace(/\/+$/, "");
