@@ -30,7 +30,7 @@ vercel link
 vercel --prod
 ```
 
-A `*.vercel.app` URL is fine — no paid domain. After the first production deploy, set `NEXT_PUBLIC_SITE_ORIGIN` to that URL (or your custom host) so beat-me links and OG never point at pushflappy.com.
+Canonical origin is **https://squatflappy.com** (share, OG, sitemap, beat-me). A `*.vercel.app` URL is fine to serve the app until DNS is attached — do not buy a domain from this repo. Override with `NEXT_PUBLIC_SITE_ORIGIN` if you need a different public host. Never use pushflappy.com.
 
 Optional durable daily board (same Vercel KV / Upstash pair as other apps is OK — keys are prefixed `squat-flappy:`):
 

@@ -1,42 +1,26 @@
 /**
  * Public site origin for share links, OG, robots, sitemap.
+ * Canonical product host is squatflappy.com (DNS may be attached later).
  * Never hardcode pushflappy.com — this is a sibling app.
  */
 
-const FALLBACK_LOCAL = "http://localhost:3000";
+export const CANONICAL_ORIGIN = "https://squatflappy.com";
 
 function stripSlash(url: string): string {
   return url.replace(/\/+$/, "");
 }
 
-function asHttpsHost(host: string): string {
-  const trimmed = host.trim().replace(/^https?:\/\//, "");
-  return `https://${stripSlash(trimmed)}`;
-}
-
 /**
  * Resolve the public origin.
- * Priority: NEXT_PUBLIC_SITE_ORIGIN → Vercel production URL → Vercel URL → localhost.
+ * NEXT_PUBLIC_SITE_ORIGIN overrides; otherwise squatflappy.com.
+ * *.vercel.app is fine to serve the app until DNS is attached.
  */
 export function siteOrigin(
   env: NodeJS.ProcessEnv = process.env
 ): string {
   const explicit = env.NEXT_PUBLIC_SITE_ORIGIN?.trim();
   if (explicit) return stripSlash(explicit);
-
-  if (typeof window !== "undefined" && window.location?.origin) {
-    const live = stripSlash(window.location.origin);
-    if (live && !live.includes("pushflappy.com")) return live;
-  }
-
-  const production = env.VERCEL_PROJECT_PRODUCTION_URL?.trim();
-  if (production) return asHttpsHost(production);
-
-  const vercelUrl =
-    env.NEXT_PUBLIC_VERCEL_URL?.trim() || env.VERCEL_URL?.trim();
-  if (vercelUrl) return asHttpsHost(vercelUrl);
-
-  return FALLBACK_LOCAL;
+  return CANONICAL_ORIGIN;
 }
 
 export const APP_NAME = "Squat Flappy";

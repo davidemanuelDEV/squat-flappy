@@ -35,7 +35,7 @@ const FAQS: { q: string; a: string }[] = [
   },
   {
     q: "What camera setup do I need?",
-    a: "Laptop on a standing desk, webcam at eye height, facing you. Allow camera permission, start in a squat, and hold parallel for about a second to lock “up.” Knees can hide behind the desk — hips are enough. HTTPS or localhost is required.",
+    a: "Laptop on a standing desk, webcam at eye height, facing you. Allow camera permission, start in a squat, and hold parallel for about a second to lock “up.” Knees can hide behind the desk — hips are enough. HTTPS (squatflappy.com or *.vercel.app) or localhost is required.",
   },
   {
     q: "Is this a mode inside Push Flappy?",
@@ -55,7 +55,7 @@ const FAQS: { q: string; a: string }[] = [
   },
   {
     q: "Do I need an account or a paid domain?",
-    a: "No. There are no logins and no paid domain. A *.vercel.app URL is fine. Local high score stays on your device. Daily board posts are optional and anonymous.",
+    a: "No. There are no logins. The canonical home is squatflappy.com; a *.vercel.app URL is fine until DNS is attached. Local high score stays on your device. Daily board posts are optional and anonymous.",
   },
   {
     q: "Why won’t the camera start?",

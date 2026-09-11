@@ -207,7 +207,7 @@ export default function HomePage() {
             </Link>
           </p>
           <p className="text-[11px] text-teal-700">
-            {APP_NAME} · no accounts · pose stays on your device
+            squatflappy.com · no accounts · pose stays on your device
           </p>
         </footer>
       </div>

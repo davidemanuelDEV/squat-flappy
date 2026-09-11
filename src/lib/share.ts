@@ -289,7 +289,7 @@ export function renderShareCard(opts: {
 
   ctx.fillStyle = "#2dd4bf";
   ctx.font = "700 32px system-ui, sans-serif";
-  ctx.fillText("Stand. Squat. Dodge.", size / 2, 920);
+  ctx.fillText("squatflappy.com", size / 2, 920);
 
   return canvas;
 }

@@ -5,16 +5,12 @@ import { LEADERBOARD_KEY_PREFIX } from "./leaderboard-store";
 import { playUrl } from "./share";
 
 describe("site origin + board keys", () => {
-  it("prefers NEXT_PUBLIC_SITE_ORIGIN and never defaults to pushflappy.com", () => {
+  it("defaults to squatflappy.com and never pushflappy.com", () => {
     assert.equal(
       siteOrigin({ NEXT_PUBLIC_SITE_ORIGIN: "https://squat-flappy.vercel.app/" }),
       "https://squat-flappy.vercel.app"
     );
-    assert.equal(
-      siteOrigin({ VERCEL_PROJECT_PRODUCTION_URL: "squat-example.vercel.app" }),
-      "https://squat-example.vercel.app"
-    );
-    assert.equal(siteOrigin({}), "http://localhost:3000");
+    assert.equal(siteOrigin({}), "https://squatflappy.com");
     assert.ok(!siteOrigin({}).includes("pushflappy.com"));
   });
 

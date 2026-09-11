@@ -169,6 +169,16 @@ export async function GET(req: NextRequest) {
               ? "Think you can beat me?"
               : "Your standing desk is now an arcade."}
           </div>
+          <div
+            style={{
+              marginTop: 16,
+              color: "#2dd4bf",
+              fontSize: 28,
+              fontWeight: 700,
+            }}
+          >
+            squatflappy.com
+          </div>
         </div>
       </div>
     ),
