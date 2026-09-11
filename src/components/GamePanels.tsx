@@ -3,6 +3,8 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
 
+import { track } from "@/lib/analytics";
+import { SIBLING_PLAY_URL, SIBLING_PROMO_LINE } from "@/lib/site";
 import type { CalibPhase } from "@/lib/pose";
 import type { LeaderboardEntry } from "@/lib/leaderboard-store";
 
@@ -168,6 +170,38 @@ export function CountdownOverlay({ count }: { count: number }) {
   );
 }
 
+function siblingSurface(beatTarget?: number | null, beatVictory?: boolean) {
+  if (beatVictory) return "victory";
+  if (beatTarget != null) return "challenge";
+  return "wipeout";
+}
+
+function SiblingPromo({
+  beatTarget,
+  beatVictory,
+}: {
+  beatTarget?: number | null;
+  beatVictory?: boolean;
+}) {
+  return (
+    <a
+      href={SIBLING_PLAY_URL}
+      target="_blank"
+      rel="noopener noreferrer"
+      onClick={() =>
+        track("sibling_click", {
+          placement: "more_ways",
+          surface: siblingSurface(beatTarget, beatVictory),
+          sibling: "push-flappy",
+        })
+      }
+      className="inline-flex min-h-8 items-center justify-center text-[11px] font-medium text-teal-400 underline-offset-2 hover:text-teal-200 hover:underline"
+    >
+      {SIBLING_PROMO_LINE}
+    </a>
+  );
+}
+
 export function GameOverPanel({
   score,
   highScore,
@@ -306,6 +340,9 @@ export function GameOverPanel({
             </ShareActionButton>
           </div>
         </div>
+        <p className="mt-3">
+          <SiblingPromo beatTarget={beatTarget} beatVictory={beatVictory} />
+        </p>
       </div>
     </div>
   );

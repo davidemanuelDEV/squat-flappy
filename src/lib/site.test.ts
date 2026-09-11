@@ -1,6 +1,13 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import { servingOrigin, siteOrigin } from "./site";
+import {
+  SIBLING_NAME,
+  SIBLING_ORIGIN,
+  SIBLING_PLAY_URL,
+  SIBLING_PROMO_LINE,
+  servingOrigin,
+  siteOrigin,
+} from "./site";
 import { LEADERBOARD_KEY_PREFIX } from "./leaderboard-store";
 import { playUrl } from "./share";
 
@@ -75,6 +82,18 @@ describe("site origin + board keys", () => {
   it("prefixes KV keys so they cannot mix with the push board", () => {
     assert.equal(LEADERBOARD_KEY_PREFIX, "squat-flappy:lb:");
     assert.ok(!LEADERBOARD_KEY_PREFIX.includes("push-flappy"));
+  });
+
+  it("keeps a sibling play URL on pushflappy.com", () => {
+    assert.equal(SIBLING_NAME, "Push Flappy");
+    assert.equal(SIBLING_ORIGIN, "https://pushflappy.com");
+    assert.equal(SIBLING_PLAY_URL, "https://pushflappy.com/play");
+    assert.equal(
+      SIBLING_PROMO_LINE,
+      "Legs smoked? Push day → pushflappy.com"
+    );
+    assert.ok(!siteOrigin({}).includes("pushflappy.com"));
+    assert.ok(!servingOrigin({}).includes("pushflappy.com"));
   });
 
   it("builds beat-me links on /play?beat=N", () => {
