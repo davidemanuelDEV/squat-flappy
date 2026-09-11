@@ -6,7 +6,7 @@ import Link from "next/link";
 import { track } from "@/lib/analytics";
 import { CAM_SETUP_HINT, SIBLING_PLAY_URL, SIBLING_PROMO_LINE } from "@/lib/site";
 import type { CalibPhase } from "@/lib/pose";
-import type { LeaderboardEntry } from "@/lib/leaderboard-store";
+import type { LeaderboardEntry, LeaderboardStorage } from "@/lib/leaderboard-store";
 
 type CoachMessage = {
   tone: "lime" | "teal";
@@ -465,7 +465,7 @@ export function LeaderboardPanel({
   open: boolean;
   dayKey: string;
   entries: LeaderboardEntry[];
-  storage: "kv" | "memory" | null;
+  storage: LeaderboardStorage | null;
   loading: boolean;
   error: string | null;
   nick: string;
@@ -501,7 +501,7 @@ export function LeaderboardPanel({
           <p className="text-sm font-bold">Daily board</p>
           <p className="text-[11px] text-teal-400">
             {dayKey} · PT seed ·{" "}
-            {storage === "kv"
+            {storage && storage !== "memory"
               ? "live"
               : storage === "memory"
                 ? "memory (not durable)"

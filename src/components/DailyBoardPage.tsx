@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { laDayKey } from "@/lib/daily";
-import type { LeaderboardEntry } from "@/lib/leaderboard-store";
+import type { LeaderboardEntry, LeaderboardStorage } from "@/lib/leaderboard-store";
 import { LeaderboardPanel } from "@/components/GamePanels";
 
 /** Camera-free daily board. Never imports MediaPipe / getUserMedia. */
@@ -10,7 +10,7 @@ export default function DailyBoardPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [entries, setEntries] = useState<LeaderboardEntry[]>([]);
-  const [storage, setStorage] = useState<"kv" | "memory" | null>(null);
+  const [storage, setStorage] = useState<LeaderboardStorage | null>(null);
   const [dayKey, setDayKey] = useState(laDayKey());
 
   const loadBoard = useCallback(async () => {
@@ -27,7 +27,7 @@ export default function DailyBoardPage() {
       const data = (await res.json()) as {
         dayKey: string;
         entries: LeaderboardEntry[];
-        storage: "kv" | "memory";
+        storage: LeaderboardStorage;
         demo?: boolean;
       };
       setEntries(data.entries ?? []);

@@ -32,17 +32,18 @@ vercel --prod
 
 Canonical origin is **https://squatflappy.com** (share, OG, sitemap, beat-me). Preview deployments (`VERCEL_ENV=preview`) may emit the preview `*.vercel.app` host so branch unfurls stay fetchable. Override with `NEXT_PUBLIC_SITE_ORIGIN` if you need a different public host. Never use pushflappy.com.
 
-Optional durable daily board (same Vercel KV / Upstash pair as other apps is OK — keys are prefixed `squat-flappy:`):
+Optional durable daily board (shared private Blob store `flappy-boards` with Push is OK — path/keys stay prefixed `squat-flappy/` / `squat-flappy:`):
 
 | Env var | Purpose |
 |---------|---------|
 | `NEXT_PUBLIC_SITE_ORIGIN` | Public origin for share / OG / sitemap / beat-me. Defaults to `https://squatflappy.com`. |
+| `BLOB_READ_WRITE_TOKEN` | Private Vercel Blob. Board JSON at `squat-flappy/lb/{day}.json` |
 | `KV_REST_API_URL` | Upstash / Vercel KV REST URL |
 | `KV_REST_API_TOKEN` | REST token |
 | `UPSTASH_REDIS_REST_URL` | Alias for `KV_REST_API_URL` (same REST protocol) |
 | `UPSTASH_REDIS_REST_TOKEN` | Alias for `KV_REST_API_TOKEN` |
 
-Without KV the board still works in memory (lost on cold starts). Either env pair is enough — `KV_*` wins if both are set. Keys stay prefixed `squat-flappy:` so this board never mixes with Push.
+Persist order: Blob (if `BLOB_READ_WRITE_TOKEN` is set), else KV/Upstash REST, else in-memory (lost on cold starts). `KV_*` wins over `UPSTASH_*` when both REST pairs are set. Never commit `.env.local`.
 
 ## Pose (the difference)
 
@@ -62,7 +63,7 @@ Recommend chest-height framing and stepping back so hips stay visible when possi
 - Next.js 15 · React 19 · TypeScript · Tailwind CSS v4
 - `@mediapipe/tasks-vision` (on-device, no API keys)
 - `@vercel/analytics`
-- Optional Vercel KV / Upstash for the daily board
+- Optional Vercel Blob / KV / Upstash for the daily board
 - No accounts, no VectorCare branding, original geometric art
 
 ## Routes

@@ -4,7 +4,7 @@ import {
   allowRequest,
   countRealEntries,
   demoLeaderboardAllowed,
-  kvConfigured,
+  resolveStorage,
 } from "@/lib/leaderboard-store";
 
 export const runtime = "nodejs";
@@ -30,7 +30,7 @@ export async function GET(req: NextRequest) {
   }
 
   const board = await countRealEntries(day);
-  const storage: "kv" | "memory" = kvConfigured() ? "kv" : "memory";
+  const storage = resolveStorage();
 
   return NextResponse.json(
     {
