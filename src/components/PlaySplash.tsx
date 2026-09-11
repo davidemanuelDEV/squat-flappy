@@ -1,4 +1,5 @@
 import { GeometricBird } from "@/components/BrandMark";
+import { CAM_SETUP_HINT } from "@/lib/site";
 
 export default function PlaySplash({ label = "Loading…" }: { label?: string }) {
   return (
@@ -10,6 +11,7 @@ export default function PlaySplash({ label = "Loading…" }: { label?: string })
         </p>
       </div>
       <p className="text-sm text-teal-200/70">{label}</p>
+      <p className="text-center text-xs text-teal-500">{CAM_SETUP_HINT}</p>
     </div>
   );
 }

@@ -105,7 +105,7 @@ const SEED_TEMPLATE: Omit<LeaderboardEntry, "dayKey" | "at">[] = [
   { nick: "QuadGoblin", emoji: "🦵", score: 36, reps: 40, country: "GB", demo: true },
   { nick: "ParallelPete", emoji: "🟢", score: 32, reps: 28, country: "CA", demo: true },
   { nick: "AirSquatAnn", emoji: "🐦", score: 27, reps: 24, country: "AU", demo: true },
-  { nick: "EyeHeight", emoji: "👀", score: 23, reps: 21, country: "DE", demo: true },
+  { nick: "ChestHeight", emoji: "💚", score: 23, reps: 21, country: "DE", demo: true },
   { nick: "LimeBird", emoji: "🐤", score: 18, reps: 16, country: "JP", demo: true },
   { nick: "StandFirst", emoji: "🧍", score: 14, reps: 15, country: "BR", demo: true },
   { nick: "GateRunner", emoji: "🚪", score: 11, reps: 12, country: "IN", demo: true },

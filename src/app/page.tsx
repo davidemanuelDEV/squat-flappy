@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
 import { GeometricBird, SteelBar } from "@/components/BrandMark";
-import { APP_HOOK, APP_LINE, APP_NAME, siteOrigin } from "@/lib/site";
+import { APP_HOOK, APP_LINE, APP_NAME, CAM_SETUP_HINT, siteOrigin } from "@/lib/site";
 
 export default function HomePage() {
   const origin = siteOrigin();
@@ -19,7 +19,7 @@ export default function HomePage() {
               url: origin,
               applicationCategory: "GameApplication",
               operatingSystem: "Web",
-              description: `${APP_HOOK} ${APP_LINE} Air squat game and desk exercise game using an eye-height webcam.`,
+              description: `${APP_HOOK} ${APP_LINE} Air squat game and desk exercise game using a chest-height webcam.`,
               offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
             },
             {
@@ -31,8 +31,8 @@ export default function HomePage() {
               step: [
                 {
                   "@type": "HowToStep",
-                  name: "Cam at eye height",
-                  text: "Put the laptop on the desk, webcam facing you. Allow the camera.",
+                  name: "Cam at chest height",
+                  text: "Put the laptop on the desk, webcam at chest height facing you. Allow the camera.",
                 },
                 {
                   "@type": "HowToStep",
@@ -74,7 +74,7 @@ export default function HomePage() {
             {APP_LINE}
           </p>
           <p className="mx-auto max-w-md text-[15px] leading-relaxed text-teal-200/70">
-            Eye-height webcam air-squat game. Hold parallel to lock bird up —
+            Chest-height webcam air-squat game. Hold parallel to lock bird up —
             stand tall to dive through steel gates. On-device pose. No accounts.
           </p>
         </header>
@@ -127,7 +127,7 @@ export default function HomePage() {
             </a>
           </div>
           <p className="text-center text-xs text-teal-500">
-            Cam at eye height · start in a squat · HTTPS or localhost
+            {CAM_SETUP_HINT} · HTTPS or localhost
           </p>
         </div>
 
@@ -139,9 +139,10 @@ export default function HomePage() {
             How it works
           </h2>
           <ol className="grid gap-3">
-            <Step n={1} title="Cam at eye height">
-              Laptop on the standing desk, webcam facing you. Allow the camera.
-              Knees can hide behind the desk — we track hips first.
+            <Step n={1} title="Cam at chest height">
+              Laptop on the standing desk, webcam at chest height facing you.
+              Allow the camera. Chest-height framing keeps hips and knees more
+              visible.
             </Step>
             <Step n={2} title="Start in a squat">
               Hold a ~90° air squat (thighs parallel) for about a second. That

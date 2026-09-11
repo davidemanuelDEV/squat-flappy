@@ -8,6 +8,7 @@
  *
  * Primary signal: hip height (MediaPipe Y grows downward).
  * Secondary: knee angle (hip–knee–ankle) when knees are visible.
+ * Recommended setup: chest-height webcam so hips and knees stay in frame.
  * Desk occlusion: if the desk hides knees, fall back to hip-only.
  *
  * Desk hypothesis: hip Y is more reliable than knees at a standing desk.

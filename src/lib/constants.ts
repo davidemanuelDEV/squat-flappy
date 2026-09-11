@@ -58,7 +58,7 @@ export const SQUAT_ANGLE_DEG = 90;
 /** Standing tall ≈ this knee angle */
 export const STAND_ANGLE_DEG = 172;
 
-/** Hip weight when knees are visible (desk hypothesis: hip Y is more reliable) */
+/** Hip weight when knees are visible (chest-height cam keeps hips/knees in frame) */
 export const HIP_BLEND_WEIGHT = 0.68;
 
 /** Visibility threshold for using a landmark */

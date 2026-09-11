@@ -33,11 +33,11 @@ export async function generateMetadata({
     return {
       title: `Play — ${APP_NAME}`,
       description:
-        "Play Squat Flappy with air squats. Eye-height camera + on-device pose. Challenge friends with beat-me links.",
+        "Play Squat Flappy with air squats. Chest-height camera + on-device pose. Challenge friends with beat-me links.",
       openGraph: {
         title: `Play — ${APP_NAME}`,
         description:
-          "Play Squat Flappy with air squats. Eye-height camera + on-device pose. Challenge friends with beat-me links.",
+          "Play Squat Flappy with air squats. Chest-height camera + on-device pose. Challenge friends with beat-me links.",
         url: `${site}/play`,
         type: "website",
         siteName: APP_NAME,
@@ -47,7 +47,7 @@ export async function generateMetadata({
         card: "summary_large_image",
         title: `Play — ${APP_NAME}`,
         description:
-          "Play Squat Flappy with air squats. Eye-height camera + on-device pose. Challenge friends with beat-me links.",
+          "Play Squat Flappy with air squats. Chest-height camera + on-device pose. Challenge friends with beat-me links.",
         images: ["/api/og"],
       },
     };
@@ -55,7 +55,7 @@ export async function generateMetadata({
 
   const repsBit = reps != null && reps > 0 ? ` · ${reps} squats` : "";
   const title = `Beat my ${beat} on ${APP_NAME}`;
-  const description = `Think you can beat ${beat}${repsBit}? Open the link, cam at eye height, start in a squat, and clear more steel gates.`;
+  const description = `Think you can beat ${beat}${repsBit}? Open the link, cam at chest height, start in a squat, and clear more steel gates.`;
   const playUrl = new URL("/play", site);
   playUrl.searchParams.set("beat", String(beat));
   if (reps != null && reps > 0) playUrl.searchParams.set("reps", String(reps));

@@ -114,7 +114,7 @@ export const WIPEOUT_LINES = [
   "Your standing desk just won.",
   "Air squat: strong. Aim: spicy.",
   "The monitor saw everything.",
-  "Eye height was fine. Knees were rumors.",
+  "Chest height was fine. Knees were rumors.",
   "Arcade mode: you paid in quads.",
   "That wasn’t a gap, that was a standup.",
   "Bird tried parkour. Steel said no.",

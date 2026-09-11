@@ -1,6 +1,8 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import {
+  APP_TAGLINE,
+  CAM_SETUP_HINT,
   SIBLING_NAME,
   SIBLING_ORIGIN,
   SIBLING_PLAY_URL,
@@ -82,6 +84,14 @@ describe("site origin + board keys", () => {
   it("prefixes KV keys so they cannot mix with the push board", () => {
     assert.equal(LEADERBOARD_KEY_PREFIX, "squat-flappy:lb:");
     assert.ok(!LEADERBOARD_KEY_PREFIX.includes("push-flappy"));
+  });
+
+  it("recommends chest-height camera setup, not eye height", () => {
+    assert.match(CAM_SETUP_HINT, /chest height/i);
+    assert.match(APP_TAGLINE, /chest-height/i);
+    assert.doesNotMatch(CAM_SETUP_HINT, /eye height/i);
+    assert.doesNotMatch(APP_TAGLINE, /eye height/i);
+    assert.ok(!siteOrigin({}).includes("pushflappy.com"));
   });
 
   it("keeps a sibling play URL on pushflappy.com", () => {
