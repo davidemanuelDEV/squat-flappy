@@ -2,9 +2,17 @@ import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import Link from "next/link";
 import { GeometricBird } from "@/components/BrandMark";
-import { APP_LINE, APP_NAME, servingOrigin } from "@/lib/site";
+import {
+  APP_LINE,
+  APP_NAME,
+  OG_IMAGE_HEIGHT,
+  OG_IMAGE_WIDTH,
+  ogImageUrl,
+  servingOrigin,
+} from "@/lib/site";
 
 const site = servingOrigin();
+const ogImage = ogImageUrl({ origin: site });
 
 export const metadata: Metadata = {
   title: `FAQ — ${APP_NAME}`,
@@ -17,14 +25,21 @@ export const metadata: Metadata = {
     url: `${site}/faq`,
     type: "website",
     siteName: APP_NAME,
-    images: [{ url: "/api/og", width: 1200, height: 630, alt: `${APP_NAME} FAQ` }],
+    images: [
+      {
+        url: ogImage,
+        width: OG_IMAGE_WIDTH,
+        height: OG_IMAGE_HEIGHT,
+        alt: `${APP_NAME} FAQ`,
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
     title: `FAQ — ${APP_NAME}`,
     description:
       "How Squat Flappy works: air squats drive the bird, desk camera setup, beat-me links, daily board, and on-device privacy.",
-    images: ["/api/og"],
+    images: [ogImage],
   },
 };
 

@@ -9,6 +9,8 @@ const nextConfig: NextConfig = {
       ],
     },
   ],
+  // Leftover crawler / share caches that still request the static bird card.
+  rewrites: async () => [{ source: "/og.png", destination: "/api/og" }],
 };
 
 export default nextConfig;

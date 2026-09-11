@@ -1,6 +1,12 @@
 import type { Metadata } from "next";
 import PlayClient from "./PlayClient";
-import { APP_NAME, servingOrigin } from "@/lib/site";
+import {
+  APP_NAME,
+  OG_IMAGE_HEIGHT,
+  OG_IMAGE_WIDTH,
+  ogImageUrl,
+  servingOrigin,
+} from "@/lib/site";
 
 type PlaySearch = {
   beat?: string | string[];
@@ -28,6 +34,14 @@ export async function generateMetadata({
   const sp = await searchParams;
   const beat = parseNonNegInt(first(sp.beat));
   const reps = parseNonNegInt(first(sp.reps));
+  const ogImage =
+    beat == null
+      ? ogImageUrl({ origin: site })
+      : ogImageUrl({
+          origin: site,
+          beat,
+          reps: reps ?? undefined,
+        });
 
   if (beat == null) {
     return {
@@ -41,14 +55,21 @@ export async function generateMetadata({
         url: `${site}/play`,
         type: "website",
         siteName: APP_NAME,
-        images: [{ url: "/api/og", width: 1200, height: 630, alt: APP_NAME }],
+        images: [
+          {
+            url: ogImage,
+            width: OG_IMAGE_WIDTH,
+            height: OG_IMAGE_HEIGHT,
+            alt: APP_NAME,
+          },
+        ],
       },
       twitter: {
         card: "summary_large_image",
         title: `Play — ${APP_NAME}`,
         description:
           "Play Squat Flappy with air squats. Chest-height camera + on-device pose. Challenge friends with beat-me links.",
-        images: ["/api/og"],
+        images: [ogImage],
       },
     };
   }
@@ -60,10 +81,6 @@ export async function generateMetadata({
   playUrl.searchParams.set("beat", String(beat));
   if (reps != null && reps > 0) playUrl.searchParams.set("reps", String(reps));
 
-  const ogPath = new URL("/api/og", site);
-  ogPath.searchParams.set("beat", String(beat));
-  if (reps != null && reps > 0) ogPath.searchParams.set("reps", String(reps));
-
   return {
     title,
     description,
@@ -74,14 +91,19 @@ export async function generateMetadata({
       type: "website",
       siteName: APP_NAME,
       images: [
-        { url: ogPath.toString(), width: 1200, height: 630, alt: title },
+        {
+          url: ogImage,
+          width: OG_IMAGE_WIDTH,
+          height: OG_IMAGE_HEIGHT,
+          alt: title,
+        },
       ],
     },
     twitter: {
       card: "summary_large_image",
       title,
       description,
-      images: [ogPath.toString()],
+      images: [ogImage],
     },
   };
 }

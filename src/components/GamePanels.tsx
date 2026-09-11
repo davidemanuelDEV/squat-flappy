@@ -185,21 +185,26 @@ function SiblingPromo({
 }) {
   const placement = siblingSurface(beatTarget, beatVictory);
   return (
-    <a
-      href={SIBLING_PLAY_URL}
-      target="_blank"
-      rel="noopener noreferrer"
-      onClick={() =>
-        track("sibling_click", {
-          placement,
-          surface: placement,
-          sibling: "push-flappy",
-        })
-      }
-      className="mt-2 flex min-h-11 w-full items-center justify-center rounded-xl border border-lime-200/60 bg-transparent px-3 py-2.5 text-sm font-semibold leading-snug text-lime-100 hover:border-lime-200 hover:bg-lime-400/10"
-    >
-      {SIBLING_PROMO_LINE}
-    </a>
+    <div className="mt-2 w-full">
+      <p className="mb-1.5 text-left text-xs font-semibold uppercase tracking-wide text-teal-300">
+        Also try
+      </p>
+      <a
+        href={SIBLING_PLAY_URL}
+        target="_blank"
+        rel="noopener noreferrer"
+        onClick={() =>
+          track("sibling_click", {
+            placement,
+            surface: placement,
+            sibling: "push-flappy",
+          })
+        }
+        className="flex min-h-12 w-full items-center justify-center rounded-xl border-2 border-lime-300 bg-transparent px-4 py-3 text-base font-semibold leading-snug text-lime-50 hover:border-lime-200 hover:bg-lime-400/10"
+      >
+        {SIBLING_PROMO_LINE}
+      </a>
+    </div>
   );
 }
 

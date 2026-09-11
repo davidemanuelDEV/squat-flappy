@@ -3,10 +3,14 @@ import { describe, it } from "node:test";
 import {
   APP_TAGLINE,
   CAM_SETUP_HINT,
+  OG_IMAGE_HEIGHT,
+  OG_IMAGE_PATH,
+  OG_IMAGE_WIDTH,
   SIBLING_NAME,
   SIBLING_ORIGIN,
   SIBLING_PLAY_URL,
   SIBLING_PROMO_LINE,
+  ogImageUrl,
   servingOrigin,
   siteOrigin,
 } from "./site";
@@ -104,6 +108,35 @@ describe("site origin + board keys", () => {
     );
     assert.ok(!siteOrigin({}).includes("pushflappy.com"));
     assert.ok(!servingOrigin({}).includes("pushflappy.com"));
+  });
+
+  it("builds OG unfurl URLs on /api/og via servingOrigin, never /og.png", () => {
+    assert.equal(OG_IMAGE_PATH, "/api/og");
+    assert.equal(OG_IMAGE_WIDTH, 1200);
+    assert.equal(OG_IMAGE_HEIGHT, 630);
+    assert.equal(ogImageUrl({ origin: siteOrigin({}) }), "https://squatflappy.com/api/og");
+    assert.equal(
+      ogImageUrl({
+        origin: servingOrigin({
+          VERCEL_ENV: "production",
+          VERCEL_PROJECT_PRODUCTION_URL: "squat-flappy.vercel.app",
+        }),
+      }),
+      "https://squatflappy.com/api/og"
+    );
+    assert.equal(
+      ogImageUrl({
+        beat: 12,
+        reps: 8,
+        origin: servingOrigin({
+          VERCEL_ENV: "preview",
+          VERCEL_URL: "squat-flappy-abc.vercel.app",
+        }),
+      }),
+      "https://squat-flappy-abc.vercel.app/api/og?beat=12&reps=8"
+    );
+    assert.ok(!ogImageUrl({ origin: siteOrigin({}) }).includes("/og.png"));
+    assert.ok(!ogImageUrl({ origin: siteOrigin({}) }).includes("pushflappy.com"));
   });
 
   it("builds beat-me links on /play?beat=N", () => {
