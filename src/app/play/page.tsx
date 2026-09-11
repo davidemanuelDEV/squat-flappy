@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import PlayClient from "./PlayClient";
-import { APP_NAME, siteOrigin } from "@/lib/site";
+import { APP_NAME, servingOrigin } from "@/lib/site";
 
 type PlaySearch = {
   beat?: string | string[];
@@ -24,7 +24,7 @@ export async function generateMetadata({
 }: {
   searchParams: Promise<PlaySearch>;
 }): Promise<Metadata> {
-  const site = siteOrigin();
+  const site = servingOrigin();
   const sp = await searchParams;
   const beat = parseNonNegInt(first(sp.beat));
   const reps = parseNonNegInt(first(sp.reps));

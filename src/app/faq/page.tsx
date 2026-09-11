@@ -2,9 +2,9 @@ import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import Link from "next/link";
 import { GeometricBird } from "@/components/BrandMark";
-import { APP_LINE, APP_NAME, siteOrigin } from "@/lib/site";
+import { APP_LINE, APP_NAME, servingOrigin } from "@/lib/site";
 
-const site = siteOrigin();
+const site = servingOrigin();
 
 export const metadata: Metadata = {
   title: `FAQ — ${APP_NAME}`,

@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import { siteOrigin } from "./site";
+import { servingOrigin, siteOrigin } from "./site";
 import { LEADERBOARD_KEY_PREFIX } from "./leaderboard-store";
 import { playUrl } from "./share";
 
@@ -12,6 +12,25 @@ describe("site origin + board keys", () => {
     );
     assert.equal(siteOrigin({}), "https://squatflappy.com");
     assert.ok(!siteOrigin({}).includes("pushflappy.com"));
+  });
+
+  it("serving origin uses the live Vercel host when canonical DNS is not set", () => {
+    assert.equal(
+      servingOrigin({
+        VERCEL_PROJECT_PRODUCTION_URL: "squat-flappy.vercel.app",
+      }),
+      "https://squat-flappy.vercel.app"
+    );
+    assert.equal(
+      servingOrigin({ VERCEL_URL: "squat-flappy-abc.vercel.app" }),
+      "https://squat-flappy-abc.vercel.app"
+    );
+    assert.equal(servingOrigin({}), "https://squatflappy.com");
+    assert.ok(
+      !servingOrigin({
+        VERCEL_PROJECT_PRODUCTION_URL: "squat-flappy.vercel.app",
+      }).includes("pushflappy.com")
+    );
   });
 
   it("prefixes KV keys so they cannot mix with the push board", () => {

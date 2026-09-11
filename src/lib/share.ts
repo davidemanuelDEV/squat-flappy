@@ -1,5 +1,5 @@
 import { drawBirdAt } from "./draw";
-import { APP_NAME, siteOrigin } from "./site";
+import { APP_NAME, servingOrigin } from "./site";
 
 /**
  * Beat-me deep links + platform share helpers.
@@ -24,7 +24,7 @@ export function playUrl(opts?: {
   reps?: number;
   origin?: string;
 }): string {
-  const origin = opts?.origin ?? siteOrigin();
+  const origin = opts?.origin ?? servingOrigin();
   const u = new URL("/play", origin);
   if (opts?.beat != null && opts.beat >= 0) {
     u.searchParams.set("beat", String(Math.floor(opts.beat)));
@@ -110,7 +110,7 @@ export function buildSharePayload(opts: {
   const url = playUrl({
     beat: opts.score,
     reps: opts.reps,
-    origin: opts.origin ?? siteOrigin(),
+    origin: opts.origin ?? servingOrigin(),
   });
   if (opts.mode === "victory" && opts.beatTarget != null) {
     return {

@@ -1,7 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono, Space_Grotesk } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
-import { APP_HOOK, APP_LINE, APP_NAME, siteOrigin } from "@/lib/site";
+import { APP_HOOK, APP_LINE, APP_NAME, servingOrigin } from "@/lib/site";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -20,7 +20,7 @@ const display = Space_Grotesk({
   weight: ["500", "600", "700"],
 });
 
-const siteUrl = siteOrigin();
+const siteUrl = servingOrigin();
 const siteTitle = `${APP_NAME}: ${APP_LINE} — air squat camera game`;
 const siteDescription = `${APP_HOOK} ${APP_LINE} Desk exercise game with an eye-height webcam. On-device MediaPipe. No accounts.`;
 

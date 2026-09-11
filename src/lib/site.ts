@@ -10,16 +10,39 @@ function stripSlash(url: string): string {
   return url.replace(/\/+$/, "");
 }
 
+function withHttps(host: string): string {
+  const t = host.trim();
+  if (!t) return t;
+  if (/^https?:\/\//i.test(t)) return stripSlash(t);
+  return `https://${stripSlash(t)}`;
+}
+
 /**
- * Resolve the public origin.
+ * Canonical product origin for sitemap, robots, JSON-LD.
  * NEXT_PUBLIC_SITE_ORIGIN overrides; otherwise squatflappy.com.
- * *.vercel.app is fine to serve the app until DNS is attached.
  */
 export function siteOrigin(
   env: NodeJS.ProcessEnv = process.env
 ): string {
   const explicit = env.NEXT_PUBLIC_SITE_ORIGIN?.trim();
   if (explicit) return stripSlash(explicit);
+  return CANONICAL_ORIGIN;
+}
+
+/**
+ * Host crawlers can actually fetch (OG images, metadataBase, share URLs).
+ * Prefer the live Vercel production alias, then the deployment URL.
+ * After squatflappy.com is attached as production, that host wins.
+ */
+export function servingOrigin(
+  env: NodeJS.ProcessEnv = process.env
+): string {
+  const explicit = env.NEXT_PUBLIC_SITE_ORIGIN?.trim();
+  if (explicit) return stripSlash(explicit);
+  const prod = env.VERCEL_PROJECT_PRODUCTION_URL?.trim();
+  if (prod) return withHttps(prod);
+  const vercel = env.VERCEL_URL?.trim();
+  if (vercel) return withHttps(vercel);
   return CANONICAL_ORIGIN;
 }
 

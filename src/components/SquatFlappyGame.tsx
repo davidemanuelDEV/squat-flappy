@@ -583,6 +583,7 @@ export default function SquatFlappyGame() {
       reps: ui.reps,
       wipeoutLine,
       beatTarget,
+      origin: window.location.origin,
     });
 
   const currentShareCard = () =>

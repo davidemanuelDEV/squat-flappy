@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import DailyBoardPage from "@/components/DailyBoardPage";
-import { APP_NAME, siteOrigin } from "@/lib/site";
+import { APP_NAME, servingOrigin } from "@/lib/site";
 
-const site = siteOrigin();
+const site = servingOrigin();
 
 export const metadata: Metadata = {
   title: `Daily board — ${APP_NAME}`,
