@@ -4,7 +4,7 @@ import type { ReactNode } from "react";
 import Link from "next/link";
 
 import { track } from "@/lib/analytics";
-import { SIBLING_NAME, SIBLING_PLAY_URL } from "@/lib/site";
+import { SIBLING_PLAY_URL, SIBLING_PROMO_LINE } from "@/lib/site";
 import type { CalibPhase } from "@/lib/pose";
 import type { LeaderboardEntry } from "@/lib/leaderboard-store";
 
@@ -177,19 +177,12 @@ function siblingSurface(beatTarget?: number | null, beatVictory?: boolean) {
 }
 
 function SiblingPromo({
-  placement,
   beatTarget,
   beatVictory,
 }: {
-  placement: "cta" | "after";
   beatTarget?: number | null;
   beatVictory?: boolean;
 }) {
-  const label =
-    placement === "after"
-      ? `Push-up version → ${SIBLING_NAME}`
-      : `Also try ${SIBLING_NAME}`;
-
   return (
     <a
       href={SIBLING_PLAY_URL}
@@ -197,14 +190,14 @@ function SiblingPromo({
       rel="noopener noreferrer"
       onClick={() =>
         track("sibling_click", {
-          placement,
+          placement: "more_ways",
           surface: siblingSurface(beatTarget, beatVictory),
           sibling: "push-flappy",
         })
       }
-      className="inline-flex min-h-9 items-center justify-center text-[12px] font-semibold text-lime-300/90 underline-offset-2 hover:text-lime-200 hover:underline"
+      className="inline-flex min-h-8 items-center justify-center text-[11px] font-medium text-teal-400 underline-offset-2 hover:text-teal-200 hover:underline"
     >
-      {label}
+      {SIBLING_PROMO_LINE}
     </a>
   );
 }
@@ -246,7 +239,7 @@ export function GameOverPanel({
 
   return (
     <div className="absolute inset-0 z-10 flex items-end justify-center bg-gradient-to-t from-black/75 via-black/45 to-black/25 p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] sm:items-center sm:bg-black/55 sm:p-4">
-      <div className="max-h-[min(92dvh,40rem)] w-full max-w-sm overflow-y-auto rounded-2xl border border-teal-800/50 bg-teal-950/95 p-5 text-center shadow-xl backdrop-blur-md sm:p-6">
+      <div className="w-full max-w-sm rounded-2xl border border-teal-800/50 bg-teal-950/95 p-5 text-center shadow-xl backdrop-blur-md sm:p-6">
         <p className="text-sm uppercase tracking-wide text-lime-200/60">
           Game over
         </p>
@@ -272,17 +265,10 @@ export function GameOverPanel({
         {shareStatus && (
           <p className="mt-2 text-xs text-teal-300">{shareStatus}</p>
         )}
-        <p className="mt-3">
-          <SiblingPromo
-            placement="cta"
-            beatTarget={beatTarget}
-            beatVictory={beatVictory}
-          />
-        </p>
         <button
           type="button"
           onClick={onSharePrimary}
-          className="mt-2 flex min-h-12 w-full items-center justify-center rounded-xl bg-lime-400 px-4 py-3 text-base font-bold text-lime-950"
+          className="mt-4 flex min-h-12 w-full items-center justify-center rounded-xl bg-lime-400 px-4 py-3 text-base font-bold text-lime-950"
         >
           {primaryLabel}
         </button>
@@ -355,11 +341,7 @@ export function GameOverPanel({
           </div>
         </div>
         <p className="mt-3">
-          <SiblingPromo
-            placement="after"
-            beatTarget={beatTarget}
-            beatVictory={beatVictory}
-          />
+          <SiblingPromo beatTarget={beatTarget} beatVictory={beatVictory} />
         </p>
       </div>
     </div>

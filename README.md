@@ -4,7 +4,7 @@
 
 Stand. Squat. Dodge. Eye-height webcam air-squat game.
 
-Sibling of [Push Flappy](https://pushflappy.com) — its own branded app, pose mapping, and daily board. Not a mode inside Push Flappy. Wipeout / challenge share surfaces light-link the sibling at `https://pushflappy.com/play` (`SIBLING_PLAY_URL` in `src/lib/site.ts`).
+Sibling of [Push Flappy](https://pushflappy.com) — its own branded app, pose mapping, and daily board. Not a mode inside Push Flappy. Wipeout / challenge share surfaces light-link “Legs smoked? Push day → pushflappy.com” to `https://pushflappy.com/play` (`SIBLING_PLAY_URL` in `src/lib/site.ts`).
 
 ## Play
 

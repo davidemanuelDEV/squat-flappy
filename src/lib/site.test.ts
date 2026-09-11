@@ -4,6 +4,7 @@ import {
   SIBLING_NAME,
   SIBLING_ORIGIN,
   SIBLING_PLAY_URL,
+  SIBLING_PROMO_LINE,
   servingOrigin,
   siteOrigin,
 } from "./site";
@@ -48,6 +49,10 @@ describe("site origin + board keys", () => {
     assert.equal(SIBLING_NAME, "Push Flappy");
     assert.equal(SIBLING_ORIGIN, "https://pushflappy.com");
     assert.equal(SIBLING_PLAY_URL, "https://pushflappy.com/play");
+    assert.equal(
+      SIBLING_PROMO_LINE,
+      "Legs smoked? Push day → pushflappy.com"
+    );
     assert.ok(!siteOrigin({}).includes("pushflappy.com"));
     assert.ok(!servingOrigin({}).includes("pushflappy.com"));
   });

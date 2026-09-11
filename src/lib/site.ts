@@ -13,6 +13,8 @@ export const CANONICAL_ORIGIN = "https://squatflappy.com";
 export const SIBLING_NAME = "Push Flappy";
 export const SIBLING_ORIGIN = "https://pushflappy.com";
 export const SIBLING_PLAY_URL = `${SIBLING_ORIGIN}/play`;
+/** Locked growth copy — secondary only, never a primary share button. */
+export const SIBLING_PROMO_LINE = "Legs smoked? Push day → pushflappy.com";
 
 function stripSlash(url: string): string {
   return url.replace(/\/+$/, "");
