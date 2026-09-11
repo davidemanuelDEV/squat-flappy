@@ -1,7 +1,15 @@
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono, Space_Grotesk } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
-import { APP_HOOK, APP_LINE, APP_NAME, servingOrigin } from "@/lib/site";
+import {
+  APP_HOOK,
+  APP_LINE,
+  APP_NAME,
+  OG_IMAGE_HEIGHT,
+  OG_IMAGE_WIDTH,
+  ogImageUrl,
+  servingOrigin,
+} from "@/lib/site";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -21,6 +29,7 @@ const display = Space_Grotesk({
 });
 
 const siteUrl = servingOrigin();
+const ogImage = ogImageUrl({ origin: siteUrl });
 const siteTitle = `${APP_NAME}: ${APP_LINE} — air squat camera game`;
 const siteDescription = `${APP_HOOK} ${APP_LINE} Desk exercise game with a chest-height webcam. On-device MediaPipe. No accounts.`;
 
@@ -57,9 +66,9 @@ export const metadata: Metadata = {
     url: siteUrl,
     images: [
       {
-        url: "/api/og",
-        width: 1200,
-        height: 630,
+        url: ogImage,
+        width: OG_IMAGE_WIDTH,
+        height: OG_IMAGE_HEIGHT,
         alt: `${APP_NAME} — ${APP_LINE}`,
       },
     ],
@@ -68,7 +77,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: siteTitle,
     description: siteDescription,
-    images: ["/api/og"],
+    images: [ogImage],
   },
   other: {
     "mobile-web-app-capable": "yes",
