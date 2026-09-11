@@ -17,7 +17,7 @@ type CoachMessage = {
 export function OrientationTip({ show }: { show: boolean }) {
   if (!show) return null;
   return (
-    <div className="pointer-events-none absolute inset-x-0 top-[4.25rem] z-10 flex justify-center px-3 sm:top-16">
+    <div className="pointer-events-none absolute inset-x-0 top-[7.25rem] z-10 flex justify-center px-3 sm:top-[7.5rem]">
       <p className="max-w-[20rem] rounded-2xl bg-black/65 px-3 py-2 text-center text-[11px] leading-snug text-teal-50 backdrop-blur-md sm:max-w-sm sm:text-xs">
         {CAM_SETUP_HINT}. Step back so hips are in frame if you can —
         shoulders still work.

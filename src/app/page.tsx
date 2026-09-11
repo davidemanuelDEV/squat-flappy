@@ -1,15 +1,8 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
 import { GeometricBird, SteelBar } from "@/components/BrandMark";
-import {
-  APP_HOOK,
-  APP_LINE,
-  APP_NAME,
-  CAM_SETUP_HINT,
-  SIBLING_NAME,
-  SIBLING_ORIGIN,
-  siteOrigin,
-} from "@/lib/site";
+import { SiblingPromoPill } from "@/components/SiblingPromoPill";
+import { APP_HOOK, APP_LINE, APP_NAME, CAM_SETUP_HINT, siteOrigin } from "@/lib/site";
 
 export default function HomePage() {
   const origin = siteOrigin();
@@ -69,6 +62,9 @@ export default function HomePage() {
 
       <div className="relative flex flex-1 flex-col gap-8 sm:gap-10">
         <header className="space-y-4 pt-2 text-center">
+          <div className="flex justify-center">
+            <SiblingPromoPill surface="landing" />
+          </div>
           <p className="text-[11px] font-bold uppercase tracking-[0.28em] text-lime-300/95">
             Standing desk · Arcade
           </p>
@@ -213,16 +209,6 @@ export default function HomePage() {
             <Link href="/play" className="underline-offset-2 hover:underline">
               Play
             </Link>
-          </p>
-          <p className="text-sm text-teal-200">
-            <a
-              href={SIBLING_ORIGIN}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="underline-offset-2 hover:underline"
-            >
-              Also play {SIBLING_NAME}
-            </a>
           </p>
           <p className="text-[11px] text-teal-700">
             squatflappy.com · no accounts · pose stays on your device
