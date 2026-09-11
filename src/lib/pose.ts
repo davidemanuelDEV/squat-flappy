@@ -6,14 +6,16 @@
  * Calibrate holding a ~90° air squat (thighs parallel) as bird UP.
  * Standing tall = dive (bird down).
  *
- * Primary signal: hip height (MediaPipe Y grows downward).
- * Chest-height laptop cams often crop hips — fall back to shoulder Y
- * (shoulders rise/fall with a squat), then nose, so a person in frame is enough.
- * Secondary: knee angle (hip–knee–ankle) when knees are actually visible.
+ * Signal: real in-frame hips when they sit below the shoulders; otherwise
+ * shoulder Y (then nose). Chest-height laptop cams often crop hips —
+ * MediaPipe still emits them with Y pinned near the bottom, so we ignore
+ * those guesses and follow the shoulders.
  *
- * Desk hypothesis: hip Y is more reliable than knees at a standing desk.
- * If the camera is below hip height, standing can increase hip Y — we
- * invert the hip polarity once a real stand is learned.
+ * Chest-height polarity: larger MediaPipe Y = body lower = deeper squat =
+ * bird UP. Invert only when a true below-hip camera is confirmed from a
+ * real stand vs squat (knee angle). After Start, the observed min/max of
+ * the chosen torso signal is the mapping range so an 8–15% shoulder drop
+ * is enough travel.
  */
 
 import {
@@ -23,6 +25,8 @@ import {
   DEFAULT_STAND_OFFSET,
   EMA_ALPHA,
   HIP_BLEND_WEIGHT,
+  HIP_CROP_Y,
+  HIP_RELIABLE_VISIBILITY,
   KNEE_VISIBILITY,
   LM,
   MIN_LEARNED_RANGE,
@@ -111,9 +115,36 @@ export function noseHeight(landmarks: Landmark[]): number | null {
   return n.y;
 }
 
-/** Prefer hips; else shoulders; else nose. A person in frame is enough. */
+/**
+ * Hip Y only when the hips look in-frame — below the shoulders, not a
+ * cropped MediaPipe guess pinned to the bottom with mediocre visibility.
+ */
+export function usableHipHeight(landmarks: Landmark[]): number | null {
+  const hips: Landmark[] = [];
+  const lh = landmarks[LM.LEFT_HIP];
+  const rh = landmarks[LM.RIGHT_HIP];
+  if (visible(lh)) hips.push(lh);
+  if (visible(rh)) hips.push(rh);
+  if (hips.length === 0) return null;
+
+  const hipY = meanY(hips);
+  const hipVis = Math.min(...hips.map((h) => h.visibility ?? 1));
+  const shouldersY = shoulderHeight(landmarks);
+
+  if (shouldersY != null) {
+    if (hipY <= shouldersY) return null;
+    if (hipY >= HIP_CROP_Y && hipVis < HIP_RELIABLE_VISIBILITY) return null;
+  }
+  return hipY;
+}
+
+/** Prefer real in-frame hips; else shoulders; else nose. */
 export function torsoHeight(landmarks: Landmark[]): number | null {
-  return hipHeight(landmarks) ?? shoulderHeight(landmarks) ?? noseHeight(landmarks);
+  return (
+    usableHipHeight(landmarks) ??
+    shoulderHeight(landmarks) ??
+    noseHeight(landmarks)
+  );
 }
 
 function clamp(n: number, min: number, max: number): number {
@@ -180,7 +211,7 @@ export function kneesUsable(landmarks: Landmark[]): boolean {
 }
 
 export function readSquatSignals(landmarks: Landmark[]): SquatSignals {
-  const hipsY = hipHeight(landmarks);
+  const hipsY = usableHipHeight(landmarks);
   const shouldersY = shoulderHeight(landmarks);
   const hipY = hipsY ?? shouldersY ?? noseHeight(landmarks);
   const kneeAngle = bestKneeAngle(landmarks);
@@ -237,8 +268,9 @@ export function squatDepthToBirdNorm(squatDepth: number): number {
 }
 
 /**
- * If the learned stand hip is *below* the squat hip in the frame, the
- * default “higher Y = deeper squat” assumption is wrong — invert hip.
+ * True below-hip camera: the confirmed stand sits *lower in the frame*
+ * than the squat. Chest-height cams do the opposite (squat increases Y)
+ * and must not trip this on the first drop after Start.
  */
 export function shouldInvertHip(squatY: number, standY: number): boolean {
   return standY - squatY > MIN_LEARNED_RANGE * 0.5;
@@ -267,6 +299,8 @@ export class PoseTracker {
 
   private squatHipY: number | null = null;
   private standHipY: number | null = null;
+  private minTorsoY: number | null = null;
+  private maxTorsoY: number | null = null;
   private squatAngle: number | null = null;
   private standAngle: number | null = null;
   private hipInverted = false;
@@ -309,6 +343,7 @@ export class PoseTracker {
       return empty();
     }
 
+    this.observeTorso(signals);
     const rawDepth = this.instantSquatDepth(signals);
     if (this.smoothed == null) {
       this.smoothed = rawDepth;
@@ -318,7 +353,8 @@ export class PoseTracker {
 
     this.pushHistory(now, this.smoothed);
     this.updateStartCalibration(now, this.smoothed, signals);
-    this.learnRange(signals);
+    this.observeTorso(signals);
+    this.syncAnchors();
     this.updateReps(this.smoothed);
 
     return {
@@ -337,6 +373,21 @@ export class PoseTracker {
     };
   }
 
+  private torsoAnchors(hipY: number): { squatY: number; standY: number } {
+    const minY = this.minTorsoY ?? this.squatHipY ?? hipY;
+    const maxY = this.maxTorsoY ?? this.squatHipY ?? hipY;
+    const span = maxY - minY;
+    const usedSpan =
+      span >= MIN_LEARNED_RANGE ? span : DEFAULT_STAND_OFFSET;
+    const mid = span > 1e-6 ? (minY + maxY) / 2 : (this.squatHipY ?? hipY);
+    const half = usedSpan / 2;
+    if (this.hipInverted) {
+      return { squatY: mid - half, standY: mid + half };
+    }
+    // Chest-height default: larger Y = deeper squat = bird up.
+    return { squatY: mid + half, standY: mid - half };
+  }
+
   private instantSquatDepth(signals: SquatSignals): number {
     const hipY = signals.hipY;
     if (hipY == null) return this.smoothed ?? 0.5;
@@ -349,12 +400,8 @@ export class PoseTracker {
       return clamp(hipY, 0, 1);
     }
 
-    const standY =
-      this.standHipY ??
-      (this.hipInverted
-        ? this.squatHipY + DEFAULT_STAND_OFFSET
-        : this.squatHipY - DEFAULT_STAND_OFFSET);
-    const hipDepth = squatDepthFromHip(hipY, this.squatHipY, standY);
+    const { squatY, standY } = this.torsoAnchors(hipY);
+    const hipDepth = squatDepthFromHip(hipY, squatY, standY);
     const angleDepth =
       signals.kneeAngle != null
         ? squatDepthFromAngle(
@@ -366,33 +413,45 @@ export class PoseTracker {
     return blendSquatDepth(hipDepth, angleDepth, signals.kneesVisible);
   }
 
-  private learnRange(signals: SquatSignals) {
+  private observeTorso(signals: SquatSignals) {
     if (this.squatHipY == null || signals.hipY == null) return;
 
     const candidate = signals.hipY;
-    const delta = candidate - this.squatHipY;
-    if (Math.abs(delta) < MIN_LEARNED_RANGE * 0.5) return;
+    this.minTorsoY = Math.min(this.minTorsoY ?? candidate, candidate);
+    this.maxTorsoY = Math.max(this.maxTorsoY ?? candidate, candidate);
 
-    if (this.standHipY == null) {
-      this.standHipY = candidate;
-    } else if (this.hipInverted) {
-      // Inverted: stand is the larger Y
-      this.standHipY = Math.max(this.standHipY, candidate);
-    } else if (candidate < this.squatHipY) {
-      this.standHipY = Math.min(this.standHipY, candidate);
-    } else if (candidate > this.squatHipY && this.standHipY < this.squatHipY) {
-      // Keep existing stand; ignore deeper-than-squat hips unless invert trips
-    }
+    const minY = this.minTorsoY;
+    const maxY = this.maxTorsoY;
 
-    if (this.standHipY != null && shouldInvertHip(this.squatHipY, this.standHipY)) {
-      this.hipInverted = true;
-    }
-
+    // Invert only with a knee-confirmed stand vs squat — not the first
+    // chest-height drop after locking a standing torso.
     if (signals.kneeAngle != null) {
+      const kneeDepth = squatDepthFromAngle(
+        signals.kneeAngle,
+        this.squatAngle ?? SQUAT_ANGLE_DEG,
+        this.standAngle ?? STAND_ANGLE_DEG
+      );
+      if (kneeDepth < 0.3 && shouldInvertHip(minY, candidate)) {
+        this.hipInverted = true;
+      } else if (kneeDepth > 0.7 && shouldInvertHip(candidate, maxY)) {
+        this.hipInverted = true;
+      }
       if (signals.kneeAngle > (this.standAngle ?? STAND_ANGLE_DEG) - 8) {
-        this.standAngle = Math.max(this.standAngle ?? signals.kneeAngle, signals.kneeAngle);
+        this.standAngle = Math.max(
+          this.standAngle ?? signals.kneeAngle,
+          signals.kneeAngle
+        );
       }
     }
+  }
+
+  private syncAnchors() {
+    if (this.squatHipY == null || this.minTorsoY == null || this.maxTorsoY == null) {
+      return;
+    }
+    const { squatY, standY } = this.torsoAnchors(this.minTorsoY);
+    this.squatHipY = squatY;
+    this.standHipY = standY;
   }
 
   private calibPhase(): CalibPhase {
@@ -455,11 +514,8 @@ export class PoseTracker {
 
     if (elapsed >= CALIB_HOLD_MS) {
       const meanDepth = this.windowMean(now) ?? depth;
-      this.squatHipY = signals.hipY ?? meanDepth;
-      this.standHipY = this.squatHipY - DEFAULT_STAND_OFFSET;
-      this.squatAngle = signals.kneeAngle ?? SQUAT_ANGLE_DEG;
-      this.holdProgress = 1;
-      this.stableSince = null;
+      const y = signals.hipY ?? meanDepth;
+      this.anchorTorso(y, signals.kneeAngle);
     }
   }
 
@@ -496,6 +552,8 @@ export class PoseTracker {
     this.maxDepth = 0;
     this.squatHipY = null;
     this.standHipY = null;
+    this.minTorsoY = null;
+    this.maxTorsoY = null;
     this.squatAngle = null;
     this.standAngle = null;
     this.hipInverted = false;
@@ -509,19 +567,27 @@ export class PoseTracker {
   }
 
   /**
-   * Lock the current torso Y as squat / bird up so Start is never stuck
-   * waiting on the 1s hold gate (chest-height laptop cams, standing users).
-   * Stand polarity is learned from the next real move.
+   * Lock the current torso Y as the play anchor so Start is never stuck
+   * waiting on the 1s hold gate. Chest-height polarity (larger Y = bird up)
+   * applies until a knee-confirmed below-hip camera is seen. The first
+   * squat or stand expands the live range so the bird moves immediately.
    */
   lockCurrentAsSquat(): boolean {
     const y = this.lastSignals.hipY;
     if (y == null) return false;
+    this.anchorTorso(y, this.lastSignals.kneeAngle);
+    return true;
+  }
+
+  private anchorTorso(y: number, kneeAngle: number | null) {
     this.squatHipY = y;
     this.standHipY = null;
-    this.squatAngle = this.lastSignals.kneeAngle ?? SQUAT_ANGLE_DEG;
+    this.minTorsoY = y;
+    this.maxTorsoY = y;
+    this.hipInverted = false;
+    this.squatAngle = kneeAngle ?? SQUAT_ANGLE_DEG;
     this.holdProgress = 1;
     this.stableSince = null;
-    return true;
   }
 
   get isCalibrated() {

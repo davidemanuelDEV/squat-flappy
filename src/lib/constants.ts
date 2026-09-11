@@ -42,13 +42,21 @@ export const CALIB_HOLD_MS = 1000;
 export const CALIB_MAX_STD = 0.035;
 
 /**
- * Default MediaPipe hip-Y travel from calibrated squat toward stand
- * until a real stand is learned. Desk cams see a smaller range than floor cams.
+ * Seed torso-Y band after Start until a real squat/stand is observed.
+ * Shoulder travel on a chest-height cam is ~8–15%, not a 0.22 hip drop.
  */
-export const DEFAULT_STAND_OFFSET = 0.22;
+export const DEFAULT_STAND_OFFSET = 0.12;
 
-/** Minimum usable hip-Y range once motion is observed */
+/** Minimum usable torso-Y range once motion is observed (full bird travel). */
 export const MIN_LEARNED_RANGE = 0.08;
+
+/**
+ * MediaPipe still emits hips when they’re cropped off the bottom of a
+ * chest-height laptop frame: Y pinned near 1 with only mediocre visibility.
+ * Trust those only if visibility is strong.
+ */
+export const HIP_CROP_Y = 0.85;
+export const HIP_RELIABLE_VISIBILITY = 0.7;
 
 /** How far toward the top of the playable band calibrated squat sits */
 export const CALIB_UP_BIRD_FRAC = 0.12;

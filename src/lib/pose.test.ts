@@ -13,6 +13,7 @@ import {
   squatDepthFromHip,
   squatDepthToBirdNorm,
   torsoHeight,
+  usableHipHeight,
   type Landmark,
 } from "./pose";
 import { HIP_BLEND_WEIGHT, LM } from "./constants";
@@ -23,6 +24,50 @@ function lm(y: number, vis = 0.9, x = 0.5): Landmark {
 
 function blankLandmarks(): Landmark[] {
   return Array.from({ length: 33 }, () => lm(0.5, 0));
+}
+
+/** Chest-height laptop: shoulders in frame, hips cropped / hallucinated. */
+function croppedLaptop(
+  shoulderY: number,
+  hipY = 0.96,
+  hipVis = 0.55
+): Landmark[] {
+  const marks = blankLandmarks();
+  marks[LM.LEFT_SHOULDER] = lm(shoulderY);
+  marks[LM.RIGHT_SHOULDER] = lm(shoulderY + 0.01);
+  marks[LM.LEFT_HIP] = lm(hipY, hipVis);
+  marks[LM.RIGHT_HIP] = lm(hipY + 0.01, hipVis);
+  return marks;
+}
+
+function shouldersOnly(shoulderY: number): Landmark[] {
+  const marks = blankLandmarks();
+  marks[LM.LEFT_SHOULDER] = lm(shoulderY);
+  marks[LM.RIGHT_SHOULDER] = lm(shoulderY + 0.01);
+  return marks;
+}
+
+function inFrameHips(shoulderY: number, hipY: number, vis = 0.9): Landmark[] {
+  const marks = blankLandmarks();
+  marks[LM.LEFT_SHOULDER] = lm(shoulderY, vis, 0.4);
+  marks[LM.RIGHT_SHOULDER] = lm(shoulderY, vis, 0.6);
+  marks[LM.LEFT_HIP] = lm(hipY, vis, 0.4);
+  marks[LM.RIGHT_HIP] = lm(hipY, vis, 0.6);
+  return marks;
+}
+
+function pump(
+  tracker: PoseTracker,
+  marks: Landmark[],
+  t0: number,
+  n = 8,
+  dt = 40
+) {
+  let sample = tracker.update(marks, t0);
+  for (let i = 1; i < n; i++) {
+    sample = tracker.update(marks, t0 + i * dt);
+  }
+  return sample;
 }
 
 describe("squat pose mapping", () => {
@@ -164,20 +209,134 @@ describe("squat pose mapping", () => {
     assert.equal(locked.hasPose, true);
   });
 
-  it("learns invert after locking a standing torso then dropping into a squat", () => {
+  it("ignores hallucinated cropped hips in favor of moving shoulders", () => {
+    const standing = croppedLaptop(0.34);
+    const squatting = croppedLaptop(0.48);
+    const standSignals = readSquatSignals(standing);
+    const squatSignals = readSquatSignals(squatting);
+
+    assert.equal(usableHipHeight(standing), null);
+    assert.ok((hipHeight(standing) ?? 0) > 0.9);
+    assert.equal(standSignals.source, "shoulder");
+    assert.ok(Math.abs((standSignals.hipY ?? 0) - 0.345) < 1e-6);
+    assert.ok(Math.abs((torsoHeight(standing) ?? 0) - 0.345) < 1e-6);
+
+    assert.equal(squatSignals.source, "shoulder");
+    assert.ok((squatSignals.hipY ?? 0) > (standSignals.hipY ?? 0) + 0.1);
+    assert.ok(Math.abs((squatSignals.hipY ?? 0) - 0.485) < 1e-6);
+  });
+
+  it("lock standing then squat moves the bird up without invert", () => {
     const tracker = new PoseTracker();
-    const standing = blankLandmarks();
-    standing[LM.LEFT_SHOULDER] = lm(0.32);
-    standing[LM.RIGHT_SHOULDER] = lm(0.33);
+    const standing = shouldersOnly(0.32);
+    const squatting = shouldersOnly(0.46);
     tracker.update(standing, 1000);
     assert.equal(tracker.lockCurrentAsSquat(), true);
 
-    const squatting = blankLandmarks();
-    squatting[LM.LEFT_SHOULDER] = lm(0.48);
-    squatting[LM.RIGHT_SHOULDER] = lm(0.49);
-    const sample = tracker.update(squatting, 1100);
+    const stood = pump(tracker, standing, 1100);
+    const sample = pump(tracker, squatting, 2000);
+
     assert.equal(sample.hasPose, true);
     assert.equal(sample.source, "shoulder");
+    assert.equal(sample.hipInverted, false);
+    assert.ok(
+      sample.mappedNorm < stood.mappedNorm,
+      `expected squat mappedNorm ${sample.mappedNorm} < stand ${stood.mappedNorm}`
+    );
+    assert.ok(
+      sample.mappedNorm < 0.35,
+      `expected bird up (mappedNorm toward 0), got ${sample.mappedNorm}`
+    );
+  });
+
+  it("lock squat then stand moves the bird down", () => {
+    const tracker = new PoseTracker();
+    const squatting = shouldersOnly(0.48);
+    const standing = shouldersOnly(0.34);
+    tracker.update(squatting, 1000);
+    assert.equal(tracker.lockCurrentAsSquat(), true);
+
+    const squatted = pump(tracker, squatting, 1100);
+    const sample = pump(tracker, standing, 2000);
+
+    assert.equal(sample.hasPose, true);
+    assert.equal(sample.hipInverted, false);
+    assert.ok(
+      sample.mappedNorm > squatted.mappedNorm,
+      `expected stand mappedNorm ${sample.mappedNorm} > squat ${squatted.mappedNorm}`
+    );
+    assert.ok(
+      sample.mappedNorm > 0.65,
+      `expected bird down (mappedNorm toward 1), got ${sample.mappedNorm}`
+    );
+  });
+
+  it("follows shoulders when cropped hips stay pinned while the torso drops", () => {
+    const tracker = new PoseTracker();
+    const standing = croppedLaptop(0.33);
+    const squatting = croppedLaptop(0.47);
+    tracker.update(standing, 500);
+    assert.equal(tracker.lockCurrentAsSquat(), true);
+    const stood = pump(tracker, standing, 600);
+    const sample = pump(tracker, squatting, 1500);
+
+    assert.equal(sample.source, "shoulder");
+    assert.ok(sample.hipY < 0.55);
+    assert.ok(sample.hipY > stood.hipY);
+    assert.equal(sample.hipInverted, false);
+    assert.ok(sample.mappedNorm < stood.mappedNorm);
+    assert.ok(sample.mappedNorm < 0.35);
+  });
+
+  it("still prefers real in-frame hips when they are clearly visible below the shoulders", () => {
+    const marks = inFrameHips(0.3, 0.68);
+    const signals = readSquatSignals(marks);
+    assert.ok(usableHipHeight(marks)! > 0.67);
+    assert.equal(signals.source, "hip");
+    assert.ok(Math.abs((signals.hipY ?? 0) - 0.68) < 1e-6);
+    assert.ok(Math.abs((torsoHeight(marks) ?? 0) - 0.68) < 1e-6);
+
+    const tracker = new PoseTracker();
+    tracker.update(marks, 100);
+    assert.equal(tracker.lockCurrentAsSquat(), true);
+    const stood = pump(tracker, inFrameHips(0.3, 0.68), 200);
+    const squat = pump(tracker, inFrameHips(0.42, 0.8), 800);
+    assert.equal(squat.source, "hip");
+    assert.equal(squat.hipInverted, false);
+    assert.ok(squat.mappedNorm < stood.mappedNorm);
+    assert.ok(squat.mappedNorm < 0.35);
+  });
+
+  it("inverts only when knees confirm a below-hip stand vs squat", () => {
+    const tracker = new PoseTracker();
+    const squat = blankLandmarks();
+    squat[LM.LEFT_SHOULDER] = lm(0.28, 0.9, 0.4);
+    squat[LM.RIGHT_SHOULDER] = lm(0.28, 0.9, 0.6);
+    squat[LM.LEFT_HIP] = lm(0.5, 0.9, 0.4);
+    squat[LM.RIGHT_HIP] = lm(0.5, 0.9, 0.6);
+    squat[LM.LEFT_KNEE] = lm(0.7, 0.9, 0.4);
+    squat[LM.RIGHT_KNEE] = lm(0.7, 0.9, 0.6);
+    squat[LM.LEFT_ANKLE] = lm(0.7, 0.9, 0.62);
+    squat[LM.RIGHT_ANKLE] = lm(0.7, 0.9, 0.62);
+
+    const stand = blankLandmarks();
+    stand[LM.LEFT_SHOULDER] = lm(0.48, 0.9, 0.4);
+    stand[LM.RIGHT_SHOULDER] = lm(0.48, 0.9, 0.6);
+    stand[LM.LEFT_HIP] = lm(0.72, 0.9, 0.4);
+    stand[LM.RIGHT_HIP] = lm(0.72, 0.9, 0.6);
+    stand[LM.LEFT_KNEE] = lm(0.86, 0.9, 0.4);
+    stand[LM.RIGHT_KNEE] = lm(0.86, 0.9, 0.6);
+    stand[LM.LEFT_ANKLE] = lm(0.99, 0.9, 0.4);
+    stand[LM.RIGHT_ANKLE] = lm(0.99, 0.9, 0.6);
+
+    tracker.update(squat, 1000);
+    assert.equal(tracker.lockCurrentAsSquat(), true);
+    pump(tracker, squat, 1100);
+    const sample = pump(tracker, stand, 2000);
     assert.equal(sample.hipInverted, true);
+    assert.ok(
+      sample.mappedNorm > 0.65,
+      `below-hip stand should dive (mappedNorm toward 1), got ${sample.mappedNorm}`
+    );
   });
 });
