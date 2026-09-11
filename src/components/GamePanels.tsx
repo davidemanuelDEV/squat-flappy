@@ -367,7 +367,7 @@ export function GameOverPanel({
           <button
             type="submit"
             disabled={submitting || scorePosted}
-            className="flex min-h-11 w-full items-center justify-center rounded-xl bg-lime-400 px-4 py-3 font-bold text-lime-950 disabled:opacity-50"
+            className="flex min-h-11 w-full items-center justify-center rounded-xl border border-lime-100/35 bg-transparent px-4 py-3 font-semibold text-lime-50 disabled:opacity-50"
           >
             {submitting
               ? "Posting…"
@@ -452,6 +452,7 @@ export function LeaderboardPanel({
   reps,
   submitting,
   submitMsg,
+  scorePosted = false,
   onNick,
   onEmoji,
   onClose,
@@ -473,6 +474,7 @@ export function LeaderboardPanel({
   reps: number;
   submitting: boolean;
   submitMsg: string | null;
+  scorePosted?: boolean;
   onNick: (v: string) => void;
   onEmoji: (v: string) => void;
   onClose: () => void;
@@ -602,18 +604,20 @@ export function LeaderboardPanel({
               onEmoji={onEmoji}
             />
             {submitMsg && (
-              <p className={`text-xs ${submitStatusClass(submitMsg, false)}`}>
+              <p className={`text-xs ${submitStatusClass(submitMsg, scorePosted)}`}>
                 {submitMsg}
               </p>
             )}
             <div className="flex gap-2">
               <button
                 type="button"
-                onClick={onSubmit}
-                disabled={submitting}
+                onClick={() => {
+                  if (!submitting && !scorePosted) onSubmit();
+                }}
+                disabled={submitting || scorePosted}
                 className="flex min-h-11 flex-1 items-center justify-center rounded-xl bg-lime-400 px-3 font-bold text-lime-950 disabled:opacity-50"
               >
-                {submitting ? "Posting…" : "Post score"}
+                {submitting ? "Posting…" : scorePosted ? "Posted" : "Post score"}
               </button>
               <button
                 type="button"

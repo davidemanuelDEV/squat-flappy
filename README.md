@@ -39,8 +39,10 @@ Optional durable daily board (same Vercel KV / Upstash pair as other apps is OK 
 | `NEXT_PUBLIC_SITE_ORIGIN` | Public origin for share / OG / sitemap / beat-me. Defaults to `https://squatflappy.com`. |
 | `KV_REST_API_URL` | Upstash / Vercel KV REST URL |
 | `KV_REST_API_TOKEN` | REST token |
+| `UPSTASH_REDIS_REST_URL` | Alias for `KV_REST_API_URL` (same REST protocol) |
+| `UPSTASH_REDIS_REST_TOKEN` | Alias for `KV_REST_API_TOKEN` |
 
-Without KV the board still works in memory (lost on cold starts).
+Without KV the board still works in memory (lost on cold starts). Either env pair is enough — `KV_*` wins if both are set. Keys stay prefixed `squat-flappy:` so this board never mixes with Push.
 
 ## Pose (the difference)
 

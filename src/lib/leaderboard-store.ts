@@ -1,6 +1,7 @@
 /**
  * Daily leaderboard persistence.
- * Prefer Vercel KV / Upstash REST when env is set; otherwise in-memory.
+ * Prefer Vercel KV (`KV_REST_API_*`) or Upstash Redis REST
+ * (`UPSTASH_REDIS_REST_*`) when either pair is set; otherwise in-memory.
  * Keys are prefixed squat-flappy: so they never mix with the push board.
  */
 
@@ -52,8 +53,23 @@ export function rateLimitStore(): Map<string, number[]> {
   return g.__squatFlappyRl;
 }
 
-export function kvConfigured(): boolean {
-  return Boolean(process.env.KV_REST_API_URL && process.env.KV_REST_API_TOKEN);
+type EnvBag = { [key: string]: string | undefined };
+
+/** Vercel KV (`KV_REST_API_*`) or Upstash Redis REST (`UPSTASH_REDIS_REST_*`). */
+export function resolveKvRestConfig(
+  env: EnvBag = process.env
+): { url: string; token: string } | null {
+  const kvUrl = env.KV_REST_API_URL?.trim();
+  const kvToken = env.KV_REST_API_TOKEN?.trim();
+  if (kvUrl && kvToken) return { url: kvUrl, token: kvToken };
+  const upUrl = env.UPSTASH_REDIS_REST_URL?.trim();
+  const upToken = env.UPSTASH_REDIS_REST_TOKEN?.trim();
+  if (upUrl && upToken) return { url: upUrl, token: upToken };
+  return null;
+}
+
+export function kvConfigured(env: EnvBag = process.env): boolean {
+  return resolveKvRestConfig(env) != null;
 }
 
 export function demoLeaderboardAllowed(): boolean {
@@ -64,9 +80,9 @@ export function demoLeaderboardAllowed(): boolean {
 async function kvCommand<T>(
   ...args: (string | number)[]
 ): Promise<T | null> {
-  const url = process.env.KV_REST_API_URL;
-  const token = process.env.KV_REST_API_TOKEN;
-  if (!url || !token) return null;
+  const kv = resolveKvRestConfig();
+  if (!kv) return null;
+  const { url, token } = kv;
   const res = await fetch(`${url}`, {
     method: "POST",
     headers: {

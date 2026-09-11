@@ -124,6 +124,8 @@ export default function SquatFlappyGame() {
   const [submitting, setSubmitting] = useState(false);
   const [submitMsg, setSubmitMsg] = useState<string | null>(null);
   const [scorePosted, setScorePosted] = useState(false);
+  const submitLockRef = useRef(false);
+  const onSubmitScoreRef = useRef<() => Promise<void>>(async () => {});
 
   useEffect(() => {
     beatTargetRef.current = beatTarget;
@@ -504,6 +506,7 @@ export default function SquatFlappyGame() {
     setShareStatus(null);
     setSubmitMsg(null);
     setScorePosted(false);
+    submitLockRef.current = false;
     victoryFiredRef.current = false;
     setBeatVictory(false);
     setCountdown(null);
@@ -568,6 +571,7 @@ export default function SquatFlappyGame() {
     setShareStatus(null);
     setSubmitMsg(null);
     setScorePosted(false);
+    submitLockRef.current = false;
     victoryFiredRef.current = false;
     setBeatVictory(false);
     gameRef.current = {
@@ -735,8 +739,12 @@ export default function SquatFlappyGame() {
   };
 
   const onSubmitScore = async () => {
+    if (scorePosted || submitLockRef.current) return;
+    submitLockRef.current = true;
     setSubmitting(true);
     setSubmitMsg(null);
+    const score = gameRef.current?.score ?? ui.score;
+    const reps = lastPoseSampleRef.current.reps;
     try {
       try {
         localStorage.setItem(NICK_KEY, nick);
@@ -750,8 +758,8 @@ export default function SquatFlappyGame() {
         body: JSON.stringify({
           nick,
           emoji,
-          score: ui.score,
-          reps: ui.reps,
+          score,
+          reps,
           dayKey: laDayKey(),
         }),
       });
@@ -760,23 +768,31 @@ export default function SquatFlappyGame() {
       setBoardEntries(data.entries ?? []);
       setBoardStorage(data.storage);
       track("board_submit", {
-        score: ui.score,
-        reps: ui.reps,
+        score,
+        reps,
         storage: data.storage,
       });
       setScorePosted(true);
       setSubmitMsg(
         data.storage === "memory"
-          ? "Posted (memory — set KV_REST_API_URL + KV_REST_API_TOKEN for persistence)"
+          ? "Posted (memory — set KV_REST_API_* or UPSTASH_REDIS_REST_* for persistence)"
           : "Posted to today’s board!"
       );
     } catch (e) {
+      submitLockRef.current = false;
       const msg = e instanceof Error ? e.message : "Submit failed";
       setSubmitMsg(msg);
     } finally {
       setSubmitting(false);
     }
   };
+
+  onSubmitScoreRef.current = onSubmitScore;
+
+  useEffect(() => {
+    if (ui.status !== "over") return;
+    void onSubmitScoreRef.current();
+  }, [ui.status]);
 
   const startReady = camStatus === "ready" && modelReady && ui.status === "ready";
   const calibSet = calibPhase === "set";
@@ -939,6 +955,7 @@ export default function SquatFlappyGame() {
           reps={ui.reps}
           submitting={submitting}
           submitMsg={submitMsg}
+          scorePosted={scorePosted}
           onNick={setNick}
           onEmoji={setEmoji}
           onClose={() => {
