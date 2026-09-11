@@ -166,19 +166,17 @@ export function readSquatSignals(landmarks: Landmark[]): SquatSignals {
 
 /**
  * 1 at calibrated squat hip, 0 at stand.
- * `invert` flips when stand sits lower in the frame than squat (low camera).
+ * Works for both polarities: desk cams (squatY > standY) and low cams
+ * (squatY < standY). The two anchors carry polarity.
  */
 export function squatDepthFromHip(
   hipY: number,
   squatY: number,
-  standY: number,
-  invert = false
+  standY: number
 ): number {
-  const low = invert ? standY : squatY;
-  const high = invert ? squatY : standY;
-  const range = low - high;
+  const range = squatY - standY;
   if (Math.abs(range) < 1e-4) return 0.5;
-  return clamp((hipY - high) / range, 0, 1);
+  return clamp((hipY - standY) / range, 0, 1);
 }
 
 /** 1 at parallel squat (~90°), 0 at stand (~172°). Angle needs no invert. */
@@ -322,13 +320,11 @@ export class PoseTracker {
     }
 
     const standY =
-      this.standHipY ?? this.squatHipY - DEFAULT_STAND_OFFSET;
-    const hipDepth = squatDepthFromHip(
-      hipY,
-      this.squatHipY,
-      standY,
-      this.hipInverted
-    );
+      this.standHipY ??
+      (this.hipInverted
+        ? this.squatHipY + DEFAULT_STAND_OFFSET
+        : this.squatHipY - DEFAULT_STAND_OFFSET);
+    const hipDepth = squatDepthFromHip(hipY, this.squatHipY, standY);
     const angleDepth =
       signals.kneeAngle != null
         ? squatDepthFromAngle(

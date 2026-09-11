@@ -44,8 +44,8 @@ describe("squat pose mapping", () => {
     assert.equal(shouldInvertHip(0.72, 0.48), false);
     const squatY = 0.5;
     const standY = 0.72;
-    const squatDepth = squatDepthFromHip(squatY, squatY, standY, true);
-    const standDepth = squatDepthFromHip(standY, squatY, standY, true);
+    const squatDepth = squatDepthFromHip(squatY, squatY, standY);
+    const standDepth = squatDepthFromHip(standY, squatY, standY);
     assert.ok(squatDepth > 0.9);
     assert.ok(standDepth < 0.1);
   });
