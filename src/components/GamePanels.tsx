@@ -19,8 +19,8 @@ export function OrientationTip({ show }: { show: boolean }) {
   return (
     <div className="pointer-events-none absolute inset-x-0 top-[4.25rem] z-10 flex justify-center px-3 sm:top-16">
       <p className="max-w-[20rem] rounded-2xl bg-black/65 px-3 py-2 text-center text-[11px] leading-snug text-teal-50 backdrop-blur-md sm:max-w-sm sm:text-xs">
-        {CAM_SETUP_HINT}. Laptop on the desk, webcam facing you — hips and
-        knees more visible.
+        {CAM_SETUP_HINT}. Step back so hips are in frame if you can —
+        shoulders still work.
       </p>
     </div>
   );
@@ -88,8 +88,8 @@ export function ReadyPanel({
           </p>
         )}
         <p className="mt-1.5 text-xs leading-relaxed text-teal-100/80 sm:text-sm">
-          {CAM_SETUP_HINT}. Hold ~90° (parallel) to lock bird “up”. Stand tall
-          to dive. Same daily gate seed for everyone (PT).
+          {CAM_SETUP_HINT}. Step back so hips are in frame if you can —
+          shoulders work too. Tap Start to lock bird “up”. Stand tall to dive.
         </p>
         <button
           type="button"

@@ -49,10 +49,11 @@ Do **not** use torso-Y push-up mapping.
 1. Hold a ~90° air squat (thighs parallel) for ~1s — that locks bird **up**.
 2. Standing tall = dive (bird down).
 3. Prefer **hip height** (MediaPipe Y grows downward) blended with **knee angle** (hip–knee–ankle) when knees are visible.
-4. If the desk hides the knees, hip-only fallback.
-5. EMA smoothing. Reps are **squats**, not push-ups.
+4. If a chest-height laptop crops the hips, fall back to **shoulder Y** (then nose) so a person in frame can Start.
+5. If the desk hides the knees, skip the angle blend.
+6. EMA smoothing. Reps are **squats**, not push-ups.
 
-Recommend chest-height framing so hips and knees stay visible. Hip Y is still the primary desk signal; if a low camera makes stand sit *lower* in the frame than squat, hip polarity inverts automatically.
+Recommend chest-height framing and stepping back so hips stay visible when possible. Shoulders are enough to play. If a low camera makes stand sit *lower* in the frame than squat, polarity inverts automatically.
 
 ## Stack
 
