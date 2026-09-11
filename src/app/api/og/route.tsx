@@ -96,19 +96,21 @@ export async function GET(req: NextRequest) {
                 position: "relative",
               }}
             />
+            {/* Satori ignores transparent borders, so CSS triangles become yellow bars. */}
             <div
               style={{
                 position: "absolute",
                 right: 4,
                 top: 28,
-                width: 0,
-                height: 0,
-                borderTop: "14px solid transparent",
-                borderBottom: "14px solid transparent",
-                borderLeft: "28px solid #facc15",
+                width: 28,
+                height: 28,
                 display: "flex",
               }}
-            />
+            >
+              <svg width="28" height="28" viewBox="0 0 28 28">
+                <polygon points="0,2 28,14 0,26" fill="#facc15" />
+              </svg>
+            </div>
             <div
               style={{
                 position: "absolute",
