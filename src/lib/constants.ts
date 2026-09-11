@@ -37,8 +37,9 @@ export const EMA_ALPHA = 0.35;
  */
 export const CALIB_HOLD_MS = 1000;
 
-/** Max stddev of smoothed squat-depth over the hold window */
-export const CALIB_MAX_STD = 0.018;
+/** Max stddev of smoothed squat-depth over the hold window.
+ *  Slightly loose so a standing chest-height laptop cam can still lock. */
+export const CALIB_MAX_STD = 0.035;
 
 /**
  * Default MediaPipe hip-Y travel from calibrated squat toward stand

@@ -520,8 +520,17 @@ export default function SquatFlappyGame() {
 
   const onStart = () => {
     if (!gameRef.current) return;
-    if (!trackerRef.current.isCalibrated) return;
     if (countdown != null) return;
+    if (!trackerRef.current.isCalibrated) {
+      if (!trackerRef.current.lockCurrentAsSquat()) return;
+      setCalibPhase("set");
+      setHoldProgress(1);
+      lastPoseSampleRef.current = {
+        ...lastPoseSampleRef.current,
+        calibPhase: "set",
+        holdProgress: 1,
+      };
+    }
     clearCountdownTimer();
     setCountdown(3);
   };
@@ -763,7 +772,7 @@ export default function SquatFlappyGame() {
 
   const startReady = camStatus === "ready" && modelReady && ui.status === "ready";
   const calibSet = calibPhase === "set";
-  const canStart = startReady && hasPose && calibSet;
+  const canStart = startReady && hasPose;
 
   const coachMessage = (() => {
     if (!startReady) return null;
@@ -772,17 +781,17 @@ export default function SquatFlappyGame() {
         tone: "lime" as const,
         title: CAM_SETUP_HINT,
         detail:
-          "Laptop on the desk, webcam at chest height facing you. Drop to parallel so we can see your hips and knees.",
+          "Chest-height laptop cam often crops hips — step back if you can. Face or shoulders in frame is enough to Start.",
       };
     }
     if (calibPhase === "waiting" || calibPhase === "holding") {
       return {
         tone: "lime" as const,
-        title: "Hold a ~90° squat to set bird up",
+        title: "Hold a squat, or tap Start",
         detail:
           holdProgress > 0
             ? `Hold steady… ${Math.round(holdProgress * 100)}%`
-            : "Thighs parallel. Chest-height cam keeps hips and knees in frame.",
+            : "Hips preferred. Shoulders work if the desk or laptop cuts them off.",
       };
     }
     return {

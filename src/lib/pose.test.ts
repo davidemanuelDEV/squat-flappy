@@ -5,11 +5,14 @@ import {
   bestKneeAngle,
   blendSquatDepth,
   hipHeight,
+  PoseTracker,
   readSquatSignals,
+  shoulderHeight,
   shouldInvertHip,
   squatDepthFromAngle,
   squatDepthFromHip,
   squatDepthToBirdNorm,
+  torsoHeight,
   type Landmark,
 } from "./pose";
 import { HIP_BLEND_WEIGHT, LM } from "./constants";
@@ -83,5 +86,98 @@ describe("squat pose mapping", () => {
   it("computes a right angle at the knee", () => {
     const deg = angleDeg({ x: 0, y: 0 }, { x: 0, y: 1 }, { x: 1, y: 1 });
     assert.ok(Math.abs(deg - 90) < 0.01);
+  });
+
+  it("falls back to shoulders when hips are cropped (chest-height laptop)", () => {
+    const marks = blankLandmarks();
+    marks[LM.LEFT_SHOULDER] = lm(0.4);
+    marks[LM.RIGHT_SHOULDER] = lm(0.42);
+    const signals = readSquatSignals(marks);
+    assert.equal(signals.source, "shoulder");
+    assert.equal(signals.kneesVisible, false);
+    assert.equal(hipHeight(marks), null);
+    assert.ok(Math.abs((shoulderHeight(marks) ?? 0) - 0.41) < 1e-6);
+    assert.ok(Math.abs((torsoHeight(marks) ?? 0) - 0.41) < 1e-6);
+    assert.ok(Math.abs((signals.hipY ?? 0) - 0.41) < 1e-6);
+  });
+
+  it("prefers hips over shoulders when both are visible", () => {
+    const marks = blankLandmarks();
+    marks[LM.LEFT_SHOULDER] = lm(0.3);
+    marks[LM.RIGHT_SHOULDER] = lm(0.3);
+    marks[LM.LEFT_HIP] = lm(0.7);
+    marks[LM.RIGHT_HIP] = lm(0.72);
+    const signals = readSquatSignals(marks);
+    assert.equal(signals.source, "hip");
+    assert.ok(Math.abs((signals.hipY ?? 0) - 0.71) < 1e-6);
+    assert.ok(Math.abs((torsoHeight(marks) ?? 0) - 0.71) < 1e-6);
+  });
+
+  it("blends knee angle when knees are in frame even if hips miss MIN_VISIBILITY", () => {
+    const marks = blankLandmarks();
+    marks[LM.LEFT_SHOULDER] = lm(0.32);
+    marks[LM.RIGHT_SHOULDER] = lm(0.32);
+    marks[LM.LEFT_HIP] = lm(0.55, 0.46, 0.4);
+    marks[LM.RIGHT_HIP] = lm(0.55, 0.46, 0.6);
+    marks[LM.LEFT_KNEE] = lm(0.72, 0.9, 0.4);
+    marks[LM.RIGHT_KNEE] = lm(0.72, 0.9, 0.6);
+    marks[LM.LEFT_ANKLE] = lm(0.9, 0.9, 0.4);
+    marks[LM.RIGHT_ANKLE] = lm(0.9, 0.9, 0.6);
+    const signals = readSquatSignals(marks);
+    assert.equal(hipHeight(marks), null);
+    assert.equal(signals.source, "blend");
+    assert.ok(signals.kneeAngle != null);
+    assert.ok((bestKneeAngle(marks) ?? 0) > 160);
+  });
+
+  it("treats a visible nose as a person in frame", () => {
+    const marks = blankLandmarks();
+    marks[LM.NOSE] = lm(0.22);
+    const signals = readSquatSignals(marks);
+    assert.equal(signals.source, "shoulder");
+    assert.ok(Math.abs((signals.hipY ?? 0) - 0.22) < 1e-6);
+    const sample = new PoseTracker().update(marks, 1);
+    assert.equal(sample.hasPose, true);
+  });
+
+  it("does not report a pose when no person landmarks are visible", () => {
+    const sample = new PoseTracker().update(blankLandmarks(), 1);
+    assert.equal(sample.hasPose, false);
+    assert.equal(sample.source, "none");
+    assert.equal(new PoseTracker().lockCurrentAsSquat(), false);
+  });
+
+  it("sets hasPose from shoulders so Start can enable without hips", () => {
+    const tracker = new PoseTracker();
+    const marks = blankLandmarks();
+    marks[LM.LEFT_SHOULDER] = lm(0.4);
+    marks[LM.RIGHT_SHOULDER] = lm(0.41);
+    const sample = tracker.update(marks, 500);
+    assert.equal(sample.hasPose, true);
+    assert.equal(sample.source, "shoulder");
+    assert.ok(sample.hipY > 0.39 && sample.hipY < 0.42);
+    assert.equal(tracker.isCalibrated, false);
+    assert.equal(tracker.lockCurrentAsSquat(), true);
+    assert.equal(tracker.isCalibrated, true);
+    const locked = tracker.update(marks, 600);
+    assert.equal(locked.calibPhase, "set");
+    assert.equal(locked.hasPose, true);
+  });
+
+  it("learns invert after locking a standing torso then dropping into a squat", () => {
+    const tracker = new PoseTracker();
+    const standing = blankLandmarks();
+    standing[LM.LEFT_SHOULDER] = lm(0.32);
+    standing[LM.RIGHT_SHOULDER] = lm(0.33);
+    tracker.update(standing, 1000);
+    assert.equal(tracker.lockCurrentAsSquat(), true);
+
+    const squatting = blankLandmarks();
+    squatting[LM.LEFT_SHOULDER] = lm(0.48);
+    squatting[LM.RIGHT_SHOULDER] = lm(0.49);
+    const sample = tracker.update(squatting, 1100);
+    assert.equal(sample.hasPose, true);
+    assert.equal(sample.source, "shoulder");
+    assert.equal(sample.hipInverted, true);
   });
 });

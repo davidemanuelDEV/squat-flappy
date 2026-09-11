@@ -7,9 +7,9 @@
  * Standing tall = dive (bird down).
  *
  * Primary signal: hip height (MediaPipe Y grows downward).
- * Secondary: knee angle (hip–knee–ankle) when knees are visible.
- * Recommended setup: chest-height webcam so hips and knees stay in frame.
- * Desk occlusion: if the desk hides knees, fall back to hip-only.
+ * Chest-height laptop cams often crop hips — fall back to shoulder Y
+ * (shoulders rise/fall with a squat), then nose, so a person in frame is enough.
+ * Secondary: knee angle (hip–knee–ankle) when knees are actually visible.
  *
  * Desk hypothesis: hip Y is more reliable than knees at a standing desk.
  * If the camera is below hip height, standing can increase hip Y — we
@@ -40,7 +40,7 @@ export type Landmark = {
 
 export type CalibPhase = "waiting" | "holding" | "set";
 
-export type PoseSource = "blend" | "hip" | "none";
+export type PoseSource = "blend" | "hip" | "shoulder" | "none";
 
 export type SquatSignals = {
   hipY: number | null;
@@ -82,15 +82,38 @@ function meanY(points: Landmark[]): number {
   return points.reduce((sum, p) => sum + p.y, 0) / points.length;
 }
 
+function meanVisibleY(
+  landmarks: Landmark[],
+  indices: readonly number[]
+): number | null {
+  const pts: Landmark[] = [];
+  for (const i of indices) {
+    const p = landmarks[i];
+    if (visible(p)) pts.push(p);
+  }
+  if (pts.length === 0) return null;
+  return meanY(pts);
+}
+
 /** Average visible hip Y in [0,1] (MediaPipe: larger = lower in frame). */
 export function hipHeight(landmarks: Landmark[]): number | null {
-  const hips: Landmark[] = [];
-  const lh = landmarks[LM.LEFT_HIP];
-  const rh = landmarks[LM.RIGHT_HIP];
-  if (visible(lh)) hips.push(lh);
-  if (visible(rh)) hips.push(rh);
-  if (hips.length === 0) return null;
-  return meanY(hips);
+  return meanVisibleY(landmarks, [LM.LEFT_HIP, LM.RIGHT_HIP]);
+}
+
+/** Average visible shoulder Y — rises/falls with a squat when hips are cropped. */
+export function shoulderHeight(landmarks: Landmark[]): number | null {
+  return meanVisibleY(landmarks, [LM.LEFT_SHOULDER, LM.RIGHT_SHOULDER]);
+}
+
+export function noseHeight(landmarks: Landmark[]): number | null {
+  const n = landmarks[LM.NOSE];
+  if (!visible(n)) return null;
+  return n.y;
+}
+
+/** Prefer hips; else shoulders; else nose. A person in frame is enough. */
+export function torsoHeight(landmarks: Landmark[]): number | null {
+  return hipHeight(landmarks) ?? shoulderHeight(landmarks) ?? noseHeight(landmarks);
 }
 
 function clamp(n: number, min: number, max: number): number {
@@ -157,11 +180,17 @@ export function kneesUsable(landmarks: Landmark[]): boolean {
 }
 
 export function readSquatSignals(landmarks: Landmark[]): SquatSignals {
-  const hipY = hipHeight(landmarks);
+  const hipsY = hipHeight(landmarks);
+  const shouldersY = shoulderHeight(landmarks);
+  const hipY = hipsY ?? shouldersY ?? noseHeight(landmarks);
   const kneeAngle = bestKneeAngle(landmarks);
   const kneesVisible = kneeAngle != null;
-  const source: PoseSource =
-    hipY == null ? "none" : kneesVisible ? "blend" : "hip";
+  let source: PoseSource = "none";
+  if (hipY != null) {
+    if (kneesVisible) source = "blend";
+    else if (hipsY != null) source = "hip";
+    else source = "shoulder";
+  }
   return { hipY, kneeAngle, kneesVisible, source };
 }
 
@@ -477,6 +506,22 @@ export class PoseTracker {
 
   resetReps() {
     this.resetCalibration();
+  }
+
+  /**
+   * Lock the current torso Y as squat / bird up so Start is never stuck
+   * waiting on the 1s hold gate (chest-height laptop cams, standing users).
+   * Stand polarity is learned from the next real move.
+   */
+  lockCurrentAsSquat(): boolean {
+    const y = this.lastSignals.hipY;
+    if (y == null) return false;
+    this.squatHipY = y;
+    this.standHipY = null;
+    this.squatAngle = this.lastSignals.kneeAngle ?? SQUAT_ANGLE_DEG;
+    this.holdProgress = 1;
+    this.stableSince = null;
+    return true;
   }
 
   get isCalibrated() {

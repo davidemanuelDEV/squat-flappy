@@ -35,7 +35,7 @@ const FAQS: { q: string; a: string }[] = [
   },
   {
     q: "What camera setup do I need?",
-    a: "Laptop on a standing desk, webcam at chest height, facing you. Allow camera permission, start in a squat, and hold parallel for about a second to lock “up.” Chest-height framing keeps hips and knees more visible; hips are enough if the desk hides knees. HTTPS (squatflappy.com or *.vercel.app) or localhost is required.",
+    a: "Laptop on a standing desk, webcam at chest height, facing you. Step back so hips are in frame if you can — shoulders still work if the laptop crops your legs. Allow camera, start in a squat, and tap Start (or hold parallel ~1s) to lock “up.” HTTPS (squatflappy.com or *.vercel.app) or localhost is required.",
   },
   {
     q: "Is this a mode inside Push Flappy?",
@@ -59,7 +59,7 @@ const FAQS: { q: string; a: string }[] = [
   },
   {
     q: "Why won’t the camera start?",
-    a: "Browsers require a secure context (HTTPS) and an explicit permission grant. Deny the permission, use HTTP on a random IP, or cover the lens and pose won’t lock. Reload, allow camera, and hold a stable squat for calibration.",
+    a: "Browsers require a secure context (HTTPS) and an explicit permission grant. Deny the permission, use HTTP on a random IP, or cover the lens and pose won’t lock. Reload, allow camera, get your face or shoulders in frame, and tap Start.",
   },
 ];
 

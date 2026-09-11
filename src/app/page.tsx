@@ -32,12 +32,12 @@ export default function HomePage() {
                 {
                   "@type": "HowToStep",
                   name: "Cam at chest height",
-                  text: "Put the laptop on the desk, webcam at chest height facing you. Allow the camera.",
+                  text: "Put the laptop on the desk, webcam at chest height facing you. Step back so hips are in frame if you can; shoulders work too.",
                 },
                 {
                   "@type": "HowToStep",
                   name: "Start in a squat",
-                  text: "Hold a ~90° air squat for about a second to lock bird up, then tap Start.",
+                  text: "Hold a ~90° air squat, then tap Start to lock bird up.",
                 },
                 {
                   "@type": "HowToStep",
@@ -141,12 +141,11 @@ export default function HomePage() {
           <ol className="grid gap-3">
             <Step n={1} title="Cam at chest height">
               Laptop on the standing desk, webcam at chest height facing you.
-              Allow the camera. Chest-height framing keeps hips and knees more
-              visible.
+              Step back so hips are in frame if you can — shoulders work too.
             </Step>
             <Step n={2} title="Start in a squat">
-              Hold a ~90° air squat (thighs parallel) for about a second. That
-              locks bird “up”. Then tap Start.
+              Hold a ~90° air squat (thighs parallel), then tap Start. That
+              locks bird “up”.
             </Step>
             <Step n={3} title="Stand. Squat. Dodge.">
               Stand tall to dive through steel gates. Sit to rise. Clear gaps
