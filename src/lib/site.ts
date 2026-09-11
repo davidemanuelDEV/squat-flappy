@@ -15,6 +15,8 @@ export const SIBLING_ORIGIN = "https://pushflappy.com";
 export const SIBLING_PLAY_URL = `${SIBLING_ORIGIN}/play`;
 /** Locked growth copy — secondary only, never a primary share button. */
 export const SIBLING_PROMO_LINE = "Legs smoked? Push day → pushflappy.com";
+/** Top-of-page promotion badge — distinct from wipeout secondary copy. */
+export const SIBLING_LANDING_LINE = "Also play Push Flappy";
 
 function stripSlash(url: string): string {
   return url.replace(/\/+$/, "");

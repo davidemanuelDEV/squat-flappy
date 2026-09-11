@@ -56,6 +56,7 @@ import {
   ReadyPanel,
 } from "@/components/GamePanels";
 import PlaySplash from "@/components/PlaySplash";
+import { SiblingPromoPill } from "@/components/SiblingPromoPill";
 import { CAM_SETUP_HINT } from "@/lib/site";
 
 type CamStatus = "idle" | "requesting" | "ready" | "error" | "denied";
@@ -832,6 +833,13 @@ export default function SquatFlappyGame() {
           Board
         </button>
       </header>
+      {ui.status === "ready" && countdown == null && (
+        <div className="pointer-events-none absolute inset-x-0 top-[calc(max(0.5rem,env(safe-area-inset-top))+3.25rem)] z-20 flex justify-center px-3">
+          <div className="pointer-events-auto">
+            <SiblingPromoPill surface="play_ready" />
+          </div>
+        </div>
+      )}
       <div ref={containerRef} className="relative min-h-0 flex-1 touch-none">
         <video
           ref={videoRef}

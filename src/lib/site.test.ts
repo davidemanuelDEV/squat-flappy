@@ -6,6 +6,7 @@ import {
   OG_IMAGE_HEIGHT,
   OG_IMAGE_PATH,
   OG_IMAGE_WIDTH,
+  SIBLING_LANDING_LINE,
   SIBLING_NAME,
   SIBLING_ORIGIN,
   SIBLING_PLAY_URL,
@@ -106,6 +107,7 @@ describe("site origin + board keys", () => {
       SIBLING_PROMO_LINE,
       "Legs smoked? Push day → pushflappy.com"
     );
+    assert.equal(SIBLING_LANDING_LINE, "Also play Push Flappy");
     assert.ok(!siteOrigin({}).includes("pushflappy.com"));
     assert.ok(!servingOrigin({}).includes("pushflappy.com"));
   });
