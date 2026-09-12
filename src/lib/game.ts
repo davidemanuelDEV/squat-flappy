@@ -2,7 +2,12 @@
  * Scrolling gates + collision.
  * Bird Y is driven by squat pose, not gravity.
  * Gate gaps use a seeded RNG so daily runs are comparable.
- * Cadence: random holds / rises / falls (including long bottom holds).
+ * Cadence: first 10 spawned pipes are full-range squat reps
+ * (stand ↔ drop, one pipe each), then a short mid-band hold (2–4),
+ * then ~8–10 reps, repeating. No long wall-sits / bottom planks.
+ *
+ * Hip polarity (do not invert here): parallel squat = bird UP (small Y),
+ * standing tall = bird DOWN (large Y). Cadence is the gap-Y pattern only.
  * Speed: +10% at 15, 20, 25, 30, … (compounding).
  */
 
@@ -30,11 +35,22 @@ export type Pipe = {
 };
 
 export type Cadence = {
-  kind: "hold" | "rise" | "fall";
+  kind: "hold" | "reps" | "rise" | "fall";
   remaining: number;
   gapY: number;
   step: number;
 };
+
+/** First ten spawned pipes are always full-range squat reps. */
+export const OPENING_REP_COUNT = 10;
+const HOLD_LEN_MIN = 2;
+const HOLD_LEN_SPAN = 3; // 2–4
+const CYCLE_REP_MIN = 8;
+const CYCLE_REP_SPAN = 3; // 8–10
+/** Stay just inside the playable extremes so a rep is a real stand/drop. */
+const REP_INSET = 0.06;
+const HOLD_MID_T = 0.5;
+const HOLD_LOW_T = 0.64;
 
 export type GameState = {
   status: "ready" | "playing" | "over";
@@ -104,58 +120,59 @@ export function pipeGapFrac(width: number, height: number): number {
   return PIPE_GAP_FRAC;
 }
 
+function repBand(height: number, gap: number) {
+  const { min, max } = gapBounds(height, gap);
+  const range = max - min;
+  return {
+    min,
+    max,
+    range,
+    /** Squat / drop — bird UP (small canvas Y). */
+    highY: min + range * REP_INSET,
+    /** Stand — bird DOWN (large canvas Y). */
+    lowY: max - range * REP_INSET,
+    midY: min + range * HOLD_MID_T,
+    midLowY: min + range * HOLD_LOW_T,
+  };
+}
+
 function pickCadence(
   rng: Rng,
   height: number,
   gap: number,
-  prevGapY: number | null
+  prevKind: Cadence["kind"] | null
 ): Cadence {
-  const { min, max } = gapBounds(height, gap);
-  const range = max - min;
-  const roll = rng();
+  const band = repBand(height, gap);
 
-  if (roll < 0.42) {
-    const long = rng() < 0.45;
-    const remaining = long
-      ? 4 + Math.floor(rng() * 4)
-      : 2 + Math.floor(rng() * 3);
-    const place = rng();
-    let gapY: number;
-    if (place < 0.4) {
-      gapY = max - range * (0.04 + rng() * 0.1);
-    } else if (place < 0.62) {
-      gapY = min + range * (0.04 + rng() * 0.1);
-    } else if (prevGapY != null) {
-      gapY = prevGapY;
-    } else {
-      gapY = min + rng() * range;
-    }
+  // Opening (or any first pick): guaranteed full-range reps, no RNG, no holds.
+  // Start at stand (lowY) so the first ten force stand–drop–stand, not a sit.
+  if (prevKind == null) {
     return {
-      kind: "hold",
-      remaining,
-      gapY: clamp(gapY, min, max),
+      kind: "reps",
+      remaining: OPENING_REP_COUNT,
+      gapY: band.lowY,
       step: 0,
     };
   }
 
-  const remaining = 2 + Math.floor(rng() * 4);
-  const start = prevGapY != null ? prevGapY : min + rng() * range;
-  const stepMag = (0.1 + rng() * 0.16) * range;
-
-  if (roll < 0.71) {
+  if (prevKind === "reps") {
+    const remaining = HOLD_LEN_MIN + Math.floor(rng() * HOLD_LEN_SPAN);
+    const slightlyLower = rng() < 0.5;
     return {
-      kind: "rise",
+      kind: "hold",
       remaining,
-      gapY: clamp(start, min, max),
-      step: -stepMag,
+      gapY: slightlyLower ? band.midLowY : band.midY,
+      step: 0,
     };
   }
 
+  // After a hold (or a leftover rise/fall): another set of stand–drop reps.
+  const remaining = CYCLE_REP_MIN + Math.floor(rng() * CYCLE_REP_SPAN);
   return {
-    kind: "fall",
+    kind: "reps",
     remaining,
-    gapY: clamp(start, min, max),
-    step: stepMag,
+    gapY: band.lowY,
+    step: 0,
   };
 }
 
@@ -172,20 +189,23 @@ export function spawnPipe(
   const next = (): number => draws[di++] ?? 0.5;
   const localRng: Rng = () => next();
 
-  const prevGapY =
-    state.pipes.length > 0
-      ? state.pipes[state.pipes.length - 1].gapY
-      : state.cadence?.gapY ?? null;
-
   let cadence = state.cadence;
   if (!cadence || cadence.remaining <= 0) {
-    cadence = pickCadence(localRng, state.height, gap, prevGapY);
+    cadence = pickCadence(
+      localRng,
+      state.height,
+      gap,
+      cadence?.kind ?? null
+    );
   }
 
   const gapY = clamp(cadence.gapY, min, max);
 
   let followingY = gapY;
-  if (cadence.kind === "rise" || cadence.kind === "fall") {
+  if (cadence.kind === "reps") {
+    const band = repBand(state.height, gap);
+    followingY = gapY <= band.midY ? band.lowY : band.highY;
+  } else if (cadence.kind === "rise" || cadence.kind === "fall") {
     followingY = clamp(gapY + cadence.step, min, max);
   }
   const nextCadence: Cadence = {
