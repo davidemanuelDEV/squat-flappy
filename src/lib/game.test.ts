@@ -208,12 +208,21 @@ describe("squat cadence", () => {
 
   it("repeats short mid holds after later ~8–10 rep blocks", () => {
     const { pipes } = spawnMany("cycle-again", 50);
+    const standY = pipes[0]!.gapY;
+    const dropY = pipes[1]!.gapY;
+    const isRep = (y: number) => sameY(y, standY) || sameY(y, dropY);
+
     const firstHold = holdRunLength(pipes, OPENING_REP_COUNT);
     const afterHold = OPENING_REP_COUNT + firstHold;
 
-    let repLen = 1;
-    for (let i = afterHold + 1; i < pipes.length; i++) {
-      if (sameY(pipes[i]!.gapY, pipes[i - 1]!.gapY)) break;
+    let repLen = 0;
+    for (let i = afterHold; i < pipes.length && isRep(pipes[i]!.gapY); i++) {
+      if (i > afterHold) {
+        assert.ok(
+          !sameY(pipes[i]!.gapY, pipes[i - 1]!.gapY),
+          "cycle reps must keep alternating"
+        );
+      }
       repLen += 1;
     }
     assert.ok(
@@ -221,7 +230,9 @@ describe("squat cadence", () => {
       `cycle rep length ${repLen} should be 8–10`
     );
 
-    const secondHold = holdRunLength(pipes, afterHold + repLen);
+    const secondHoldAt = afterHold + repLen;
+    assert.ok(!isRep(pipes[secondHoldAt]!.gapY), "next block is a mid hold");
+    const secondHold = holdRunLength(pipes, secondHoldAt);
     assert.ok(
       secondHold >= 2 && secondHold <= 4,
       `second hold ${secondHold} should be 2–4`
